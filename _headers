@@ -1,0 +1,5 @@
+# Netlify / Cloudflare Pages: keep this private client demo out of search engines
+/*
+  X-Robots-Tag: noindex, nofollow, noarchive, nosnippet, noimageindex
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Content-Type-Options: nosniff
