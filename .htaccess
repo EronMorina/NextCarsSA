@@ -1,0 +1,4 @@
+# Apache hosting (e.g. Swiss shared hosting): keep this client demo out of search engines
+<IfModule mod_headers.c>
+  Header set X-Robots-Tag "noindex, nofollow, noarchive, nosnippet, noimageindex"
+</IfModule>

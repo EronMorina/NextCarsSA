@@ -176,6 +176,8 @@ p{margin:0}
 .adv-toggle .ico{transition:transform .25s}
 .adv-toggle.open .ico{transform:rotate(180deg)}
 .sp-hint{font-size:12.5px;color:var(--muted)}
+.sp-hint .link{color:var(--gold-ink);text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px;white-space:normal}
+.sp-hint .link:hover{color:var(--ink)}
 .field{display:flex;flex-direction:column;gap:6px;min-width:0}
 .field>label,.flabel{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.01em}
 .select,.input,.textarea{width:100%;height:46px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:0 12px;font-size:14.5px;transition:border-color .15s,box-shadow .15s}
@@ -311,7 +313,7 @@ p{margin:0}
 .tcard h3{font-size:17.5px;font-weight:800;margin-bottom:6px}
 .tcard p{color:var(--muted);font-size:14.5px}
 @media (max-width:900px){.trust{grid-template-columns:1fr 1fr}}
-@media (max-width:560px){.trust{grid-template-columns:1fr;gap:12px}.tcard{padding:20px;display:grid;grid-template-columns:46px 1fr;gap:4px 14px}.ticon{grid-row:span 2;margin:0}}
+@media (max-width:560px){.trust{grid-template-columns:1fr;gap:12px}.tcard{padding:20px;display:grid;grid-template-columns:46px 1fr;gap:4px 14px}.ticon{grid-row:span 2;margin:0}.tcard>*:not(.ticon){grid-column:2}}
 
 /* How selling works */
 .split{display:grid;grid-template-columns:1.05fr 1fr;gap:56px;align-items:center}
@@ -1015,7 +1017,7 @@ a.tcard:hover{border-color:var(--gold);transform:translateY(-2px)}
   <div class="hero">
     <div class="hero-bg"><img id="heroImg" alt="" fetchpriority="high"></div>
     <div class="wrap">
-      <span class="eyebrow"><span class="dot"></span><span data-i18n="hero.eyebrow">NEXT CARS SA · Schweiz</span></span>
+      <span class="eyebrow"><span class="dot"></span><span data-i18n="hero.eyebrow">NEXT CARS SA</span></span>
       <h1><span data-i18n="hero.t1">Ihr nächstes Auto</span> <span class="goldtxt" data-i18n="hero.t2">wartet hier.</span></h1>
       <p class="hero-sub" data-i18n="hero.sub">Verkauf, Leasing, Finanzierung und Eintausch von Fahrzeugen – mit Lieferung in die ganze Schweiz.</p>
       <div class="hero-actions">
@@ -1275,7 +1277,7 @@ a.tcard:hover{border-color:var(--gold);transform:translateY(-2px)}
         </div>
       </div>
       <div class="notice"><svg class="ico"><use href="#i-bank"/></svg><span data-i18n-html="bank.notice"></span></div>
-      <div class="dbox"><h3 data-i18n="q.t"></h3><p data-i18n="q.p"></p><a class="btn btn-wa btn-block" style="margin-top:14px" data-wa-general target="_blank" rel="noopener"><svg class="ico fill"><use href="#i-wa"/></svg><span data-i18n="wa.write"></span></a></div>
+      <div class="dbox" data-wa-box><h3 data-i18n="q.t"></h3><p data-i18n="q.p"></p><a class="btn btn-wa btn-block" style="margin-top:14px" data-wa-general target="_blank" rel="noopener"><svg class="ico fill"><use href="#i-wa"/></svg><span data-i18n="wa.write"></span></a></div>
     </aside>
   </div>
 </section>
@@ -1390,9 +1392,11 @@ const LOGO_SRC = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeAAAABqCAYAAABk
 /* ---------- 1. Business details ---------- */
 const BUSINESS = {
   name: 'NEXT CARS SA',
-  phone: '+41 22 785 18 50',   // Téléphone
-  mobile: '+41 78 737 02 14',  // Mobile / WhatsApp
-  whatsapp: '41787370214',     // WhatsApp number (international format, digits only)
+  /* Phone numbers — removed until the new ones are confirmed.
+     Everything phone/WhatsApp related (contact, footer, call + WhatsApp buttons) stays hidden while empty. */
+  phone: '',         // Téléphone, e.g. '+41 22 000 00 00'
+  mobile: '',        // Mobile / WhatsApp, e.g. '+41 78 000 00 00'
+  whatsapp: '',      // WhatsApp number, international format, digits only, e.g. '41780000000'
   /* Official NEXT CARS SA e-mail — NOT provided yet. Enter it here once confirmed
      (shown on the site + used for "send by e-mail" links). Form requests are e-mailed
      by Netlify Forms, see "leadEndpoint / netlifyForms" below. */
@@ -1664,7 +1668,7 @@ const I18N = {
   'title.home': ['NEXT CARS SA – Fahrzeuge, Leasing, Finanzierung', 'NEXT CARS SA – Véhicules, leasing, financement', 'NEXT CARS SA – Veicoli, leasing, finanziamento', 'NEXT CARS SA – Cars, leasing, financing'],
 
   /* Hero + search */
-  'hero.eyebrow': ['NEXT CARS SA · Schweiz', 'NEXT CARS SA · Suisse', 'NEXT CARS SA · Svizzera', 'NEXT CARS SA · Switzerland'],
+  'hero.eyebrow': ['NEXT CARS SA', 'NEXT CARS SA', 'NEXT CARS SA', 'NEXT CARS SA'],
   'hero.t1': ['Ihr nächstes Auto', 'Votre prochaine voiture', 'La tua prossima auto', 'Your next car'],
   'hero.t2': ['wartet hier.', 'vous attend ici.', 'ti aspetta qui.', 'is right here.'],
   'hero.sub': ['Verkauf, Leasing, Finanzierung und Eintausch von Fahrzeugen – mit Lieferung in die ganze Schweiz.', 'Vente, leasing, financement et reprise de véhicules – avec livraison dans toute la Suisse.', 'Vendita, leasing, finanziamento e permuta di veicoli – con consegna in tutta la Svizzera.', 'Car sales, leasing, financing and trade-ins – with delivery across Switzerland.'],
@@ -2195,7 +2199,9 @@ const telHref = () => BUSINESS.phone ? 'tel:' + BUSINESS.phone.replace(/[^\d+]/g
 const waLink = text => `https://wa.me/${digits(BUSINESS.whatsapp).replace(/^00/, '')}?text=${encodeURIComponent(text)}`;
 const vehicleUrl = v => `${location.href.split(/[?#]/)[0]}#/car/${v.id}`;
 const waVehicleText = v => tMsg('wa.vehicle', { car: `${v.title} ${v.variant}`, url: vehicleUrl(v) });
-const waBtn = (v, cls = 'btn btn-wa', label = 'WhatsApp') => `<a class="${cls}" data-wa href="${esc(waLink(waVehicleText(v)))}" target="_blank" rel="noopener">${icoF('wa')}${label}</a>`;
+/* WhatsApp buttons only exist while a WhatsApp number is configured */
+const hasWa = () => !!digits(BUSINESS.whatsapp);
+const waBtn = (v, cls = 'btn btn-wa', label = 'WhatsApp') => !hasWa() ? '' : `<a class="${cls}" data-wa href="${esc(waLink(waVehicleText(v)))}" target="_blank" rel="noopener">${icoF('wa')}${label}</a>`;
 
 /* ---------- App state (in memory) ---------- */
 const state = { favs: new Set(), seg: 'all' };
@@ -2268,7 +2274,7 @@ function card(v) {
       </div>
       <div class="c-foot">
         <div><div class="price num">${chf(v.price)}</div><span class="wtag">${ico('clip')}${esc(inspLabel(v))}</span></div>
-        <a class="wa-mini" data-wa href="${esc(waLink(waVehicleText(v)))}" target="_blank" rel="noopener" aria-label="${esc(t('wa.askFor', { car: v.title }))}">${icoF('wa')}</a>
+        ${hasWa() ? `<a class="wa-mini" data-wa href="${esc(waLink(waVehicleText(v)))}" target="_blank" rel="noopener" aria-label="${esc(t('wa.askFor', { car: v.title }))}">${icoF('wa')}</a>` : ''}
       </div>
     </div>
   </article>`;
@@ -2469,7 +2475,7 @@ function contactHtml() {
       <div class="appt">${ico('cal')}<div><b>${t('appt')}</b><span>${t('appt.sub')}</span></div></div>
       <div class="c-list">${rows}</div>
       <div class="row2" style="margin-top:0">
-        <a class="btn btn-wa" data-wa href="${esc(waLink(tMsg('wa.general')))}" target="_blank" rel="noopener">${icoF('wa')}WhatsApp</a>
+        ${hasWa() ? `<a class="btn btn-wa" data-wa href="${esc(waLink(tMsg('wa.general')))}" target="_blank" rel="noopener">${icoF('wa')}WhatsApp</a>` : ''}
         ${B.phone ? `<a class="btn btn-line" href="${tel(B.phone)}">${ico('phone')}${t('btn.call')}</a>` : ''}
         ${B.email ? `<a class="btn btn-line" href="mailto:${esc(B.email)}">${ico('mail')}${t('c.email')}</a>` : ''}
       </div>
@@ -2522,7 +2528,7 @@ function renderResults(withSkeleton = true) {
   $('#resTitle').textContent = F.make.length === 1 ? t('res.titleMake', { make: `${F.make[0]}${F.model ? ' ' + F.model : ''}` }) : t('nav.cars');
   $('#crumbLast').textContent = F.make.length === 1 ? F.make[0] : chips.length ? t('crumb.results') : t('crumb.all');
   const grid = $('#resGrid');
-  const waHelp = `<a class="btn btn-wa" data-wa href="${esc(waLink(tMsg('wa.searchMsg')))}" target="_blank" rel="noopener">${icoF('wa')}${t('wa.write')}</a>`;
+  const waHelp = hasWa() ? `<a class="btn btn-wa" data-wa href="${esc(waLink(tMsg('wa.searchMsg')))}" target="_blank" rel="noopener">${icoF('wa')}${t('wa.write')}</a>` : `<button class="btn btn-white" data-lead="inquiry">${ico('msg')}${t('lead.inquiry.title')}</button>`;
   const paint = () => {
     if (!list.length) {
       grid.innerHTML = `<div class="empty"><div class="e-ic">${ico('search')}</div><h3>${t('empty.t')}</h3><p>${t('empty.p')}</p><div class="row"><button class="btn btn-dark" data-clear>${t('empty.clear')}</button>${waHelp}</div></div>`;
@@ -2904,7 +2910,7 @@ async function sendWithSpinner(btn, type, title, rows, files) {
 }
 function leadResultHtml(title, okText, rows, res, hasPhotos, photoCount = 0, againAttr = 'data-close') {
   const summary = leadSummary(title, rows, photoCount);
-  const alt = `<a class="btn btn-wa btn-lg btn-block" href="${esc(waLink(summary))}" target="_blank" rel="noopener">${icoF('wa')}${t('res.viaWa')}</a>`
+  const alt = (hasWa() ? `<a class="btn btn-wa btn-lg btn-block" href="${esc(waLink(summary))}" target="_blank" rel="noopener">${icoF('wa')}${t('res.viaWa')}</a>` : '')
     + (BUSINESS.email ? `<a class="btn btn-line btn-block" href="mailto:${esc(BUSINESS.email)}?subject=${encodeURIComponent(title + ' – NEXT CARS SA')}&body=${encodeURIComponent(summary)}">${ico('mail')}${t('res.viaMail')}</a>` : '');
   const photoNote = hasPhotos ? `<p class="hint" style="margin-top:4px">${t('res.photoNote')}</p>` : '';
   const again = againAttr ? `<div class="row" style="margin-top:16px"><button class="btn btn-line" ${againAttr}>${t(againAttr === 'data-close' ? 'aria.close' : 'res.again')}</button></div>` : '';
@@ -2969,7 +2975,7 @@ function renderWizardHero() {
   $('#sellHeroImg').src = IMG(c.img, 1800, 600);
   $('#wzCrumb').textContent = c.crumb; $('#wzTitle').textContent = c.title; $('#wzLead').textContent = c.lead;
   $('#wzPerks').innerHTML = c.perks.map(p => `<span>${ico('check', 'sm')}${esc(p)}</span>`).join('');
-  $('#wzHelp').innerHTML = `${t('wz.help')}<a class="btn btn-wa btn-sm btn-block" style="margin-top:12px" data-wa href="${esc(waLink(tMsg('wa.general')))}" target="_blank" rel="noopener">${icoF('wa')}WhatsApp</a><a href="${c.other[0]}" class="link" style="margin-top:14px;font-size:13.5px;white-space:normal">${esc(c.other[1])}${ico('arrow', 'sm')}</a>`;
+  $('#wzHelp').innerHTML = `${hasWa() ? `${t('wz.help')}<a class="btn btn-wa btn-sm btn-block" style="margin-top:12px" data-wa href="${esc(waLink(tMsg('wa.general')))}" target="_blank" rel="noopener">${icoF('wa')}WhatsApp</a>` : ''}<a href="${c.other[0]}" class="link" style="margin-top:14px;font-size:13.5px;white-space:normal">${esc(c.other[1])}${ico('arrow', 'sm')}</a>`;
 }
 function renderWizard() {
   const S = W(), d = S.d, c = wzCfg(wzMode);
@@ -3106,8 +3112,8 @@ function paintBusiness() {
   $('#ftrSocial').innerHTML = soc.map(([ic, n, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener" aria-label="${n}">${ico(ic)}</a>`).join('');
   $('#ftrSocial').hidden = !soc.length;
   $('#ftrReviews').hidden = !REVIEWS.length;
-  $('#drawerFoot').innerHTML = `<a class="btn btn-wa btn-lg" data-wa href="${esc(waLink(tMsg('wa.general')))}" target="_blank" rel="noopener">${icoF('wa')}WhatsApp</a>${B.phone ? `<a class="btn btn-white" href="${tel(B.phone)}">${ico('phone')}${t('btn.call')}</a>` : ''}<a class="btn btn-primary" href="#/search">${ico('car')}${t('nav.cars')}</a>`;
-  $$('[data-wa-general]').forEach(a => a.href = waLink(tMsg('wa.general')));
+  $('#drawerFoot').innerHTML = `${hasWa() ? `<a class="btn btn-wa btn-lg" data-wa href="${esc(waLink(tMsg('wa.general')))}" target="_blank" rel="noopener">${icoF('wa')}WhatsApp</a>` : ''}${B.phone ? `<a class="btn btn-white" href="${tel(B.phone)}">${ico('phone')}${t('btn.call')}</a>` : ''}<a class="btn btn-primary" href="#/search">${ico('car')}${t('nav.cars')}</a>`;
+  $$('[data-wa-general]').forEach(a => { a.href = waLink(tMsg('wa.general')); a.hidden = !hasWa(); const box = a.closest('[data-wa-box]'); if (box) box.hidden = !hasWa(); });
 }
 /* ---------- Language switching ---------- */
 function applyStatic() {
