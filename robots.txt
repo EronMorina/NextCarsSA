@@ -1,0 +1,5 @@
+# The site is currently kept out of search engines with "noindex" (meta tags + X-Robots-Tag header).
+# Crawlers must be allowed to fetch pages to see that, so nothing is disallowed here.
+# At launch: remove the noindex tags/headers and add a Sitemap line.
+User-agent: *
+Allow: /

@@ -1,5 +1,14 @@
-# Netlify / Cloudflare Pages: keep this private client demo out of search engines
+# Netlify / Cloudflare Pages
+# Security headers — keep the three hosting configs (_headers, vercel.json, .htaccess) in sync.
+# Content-Security-Policy: if you add a service (form endpoint, analytics, new image host), add its domain to the
+# matching directive (e.g. a form endpoint goes into connect-src), otherwise the browser blocks it.
+# X-Robots-Tag keeps the site out of search engines; remove that line (and the robots meta tags in index.html) at launch.
 /*
   X-Robots-Tag: noindex, nofollow, noarchive, nosnippet, noimageindex
-  Referrer-Policy: strict-origin-when-cross-origin
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://images.unsplash.com https://listing-images.autoscout24.ch; connect-src 'self'; frame-src https://maps.google.com https://www.google.com; form-action 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests
+  Strict-Transport-Security: max-age=31536000
+  X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()
+  Cross-Origin-Opener-Policy: same-origin
