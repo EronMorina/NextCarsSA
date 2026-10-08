@@ -71,6 +71,7 @@
     <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
     <symbol id="i-expand" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></symbol>
     <symbol id="i-wheel" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2.5"/><path d="M12 14.5V22M9.5 12H2M14.5 12H22"/></symbol>
+    <symbol id="i-rim" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="7.8"/><circle cx="12" cy="12" r="2.2"/><path d="M12 9.8V4.2M14.1 11.3l5.3-1.7M13.3 13.8l3.3 4.5M10.7 13.8l-3.3 4.5M9.9 11.3 4.6 9.6"/></symbol>
     <symbol id="i-engine" viewBox="0 0 24 24"><path d="M3 10v6M3 13h3M6 9h3V7h6v2h2l2 2h2v6h-2l-2 2H9l-3-3V9z"/></symbol>
     <symbol id="i-palette" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></symbol>
     <symbol id="i-seat" viewBox="0 0 24 24"><path d="M7 3h4l1.5 9H18l1 5H8z"/><path d="M9 17v4M17 17v4"/></symbol>
@@ -105,6 +106,7 @@
     </a>
     <nav class="nav" aria-label="Navigation">
       <a href="#/search" data-nav="search" data-i18n="nav.cars">Fahrzeuge</a>
+      <a href="#/rims" data-nav="rims" data-i18n="nav.rims">Felgen</a>
       <a href="#/financim" data-nav="financim" data-i18n="nav.fin">Finanzierung &amp; Leasing</a>
       <a href="#/nderrim" data-nav="nderrim" data-i18n="nav.trade">Eintausch</a>
       <a href="#/blejme" data-nav="blejme" data-i18n="nav.buy">Ankauf</a>
@@ -133,6 +135,7 @@
   <nav>
     <a href="#/"><svg class="ico"><use href="#i-home"/></svg><span data-i18n="nav.home">Startseite</span></a>
     <a href="#/search"><svg class="ico"><use href="#i-car"/></svg><span data-i18n="nav.cars">Fahrzeuge</span></a>
+    <a href="#/rims"><svg class="ico"><use href="#i-rim"/></svg><span data-i18n="nav.rims">Felgen</span></a>
     <a href="#/financim"><svg class="ico"><use href="#i-bank"/></svg><span data-i18n="nav.fin">Finanzierung &amp; Leasing</span></a>
     <a href="#/nderrim"><svg class="ico"><use href="#i-swap"/></svg><span data-i18n="nav.tradeLong">Eintausch / Reprise</span></a>
     <a href="#/blejme"><svg class="ico"><use href="#i-tag"/></svg><span data-i18n="nav.buyLong">Wir kaufen Ihr Auto</span></a>
@@ -246,6 +249,16 @@
     </div>
   </section>
 
+  <section class="sec" id="rimsHome" style="padding-top:0" hidden>
+    <div class="wrap">
+      <div class="sec-head">
+        <div><span class="kicker" data-i18n="rims.homeK">Zubehör</span><h2 data-i18n="nav.rims">Felgen</h2><p data-i18n="rims.sub"></p></div>
+        <div style="display:flex;align-items:center;gap:14px"><a href="#/rims" class="link"><span data-i18n="rims.viewAll">Alle Felgen</span><svg class="ico sm"><use href="#i-arrow"/></svg></a><div class="rail-nav" data-rail="rimRail"><button data-i18n-aria="aria.prev"><svg class="ico"><use href="#i-left"/></svg></button><button data-i18n-aria="aria.next"><svg class="ico"><use href="#i-right"/></svg></button></div></div>
+      </div>
+      <div class="rail" id="rimRail"></div>
+    </div>
+  </section>
+
   <section class="sec white">
     <div class="wrap">
       <div class="sec-head"><div><span class="kicker" data-i18n="k.services">Dienstleistungen</span><h2 data-i18n="s.services">Alles für Ihr nächstes Auto</h2><p data-i18n="s.servicesSub">Von der Fahrzeugwahl bis zur Übergabe – alles aus einer Hand.</p></div></div>
@@ -271,7 +284,7 @@
           <div class="s3"><i>2</i><div><b data-i18n="st2.b"></b><span data-i18n="st2.s"></span></div></div>
           <div class="s3"><i>3</i><div><b data-i18n="st3.b"></b><span data-i18n="st3.s"></span></div></div>
         </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div class="btn-pair">
           <a href="#/blejme" class="btn btn-dark btn-lg"><span data-i18n="s.sellBtn"></span><svg class="ico"><use href="#i-arrow"/></svg></a>
           <a href="#/nderrim" class="btn btn-line btn-lg"><svg class="ico"><use href="#i-swap"/></svg><span data-i18n="nav.tradeLong"></span></a>
         </div>
@@ -330,6 +343,7 @@
   <div class="page-head">
     <div class="wrap">
       <div class="crumbs"><a href="#/" data-i18n="nav.home"></a><svg class="ico"><use href="#i-right"/></svg><a href="#/search" data-i18n="nav.cars"></a><svg class="ico"><use href="#i-right"/></svg><b id="crumbLast"></b></div>
+      <nav class="cat-tabs" data-i18n-aria="nav.cat"><a href="#/search" class="on" aria-current="page"><svg class="ico sm"><use href="#i-car"/></svg><span data-i18n="nav.cars">Fahrzeuge</span></a><a href="#/rims" ><svg class="ico sm"><use href="#i-rim"/></svg><span data-i18n="nav.rims">Felgen</span></a></nav>
       <h1 id="resTitle"></h1>
     </div>
   </div>
@@ -361,7 +375,45 @@
   </div>
 </section>
 
-<!-- ================= VEHICLE DETAIL ================= -->
+<!-- ================= RIMS / FELGEN ================= -->
+<section class="view" data-view="rims">
+  <div class="page-head">
+    <div class="wrap">
+      <div class="crumbs"><a href="#/" data-i18n="nav.home"></a><svg class="ico"><use href="#i-right"/></svg><a href="#/rims" data-i18n="nav.rims"></a><svg class="ico"><use href="#i-right"/></svg><b id="rCrumbLast"></b></div>
+      <nav class="cat-tabs" data-i18n-aria="nav.cat"><a href="#/search" ><svg class="ico sm"><use href="#i-car"/></svg><span data-i18n="nav.cars">Fahrzeuge</span></a><a href="#/rims" class="on" aria-current="page"><svg class="ico sm"><use href="#i-rim"/></svg><span data-i18n="nav.rims">Felgen</span></a></nav>
+      <h1 id="rTitle"></h1>
+      <p class="sub" data-i18n="rims.sub"></p>
+    </div>
+  </div>
+  <div class="wrap results" id="rWrap">
+    <aside class="filters" id="rFilters">
+      <div class="f-head"><h2><svg class="ico"><use href="#i-sliders"/></svg><span data-i18n="f.filters"></span></h2><div style="display:flex;gap:4px;align-items:center"><button class="clear-all" data-rclear data-i18n="f.reset"></button><button class="icon-btn filter-btn" id="rfClose" data-i18n-aria="aria.close"><svg class="ico"><use href="#i-x"/></svg></button></div></div>
+      <div class="f-body" id="rfBody"></div>
+      <div class="f-foot"><button class="btn btn-line" data-rclear style="flex:1" data-i18n="f.reset"></button><button class="btn btn-primary" id="rfApply" style="flex:2"></button></div>
+    </aside>
+    <div>
+      <div id="rTools">
+        <form class="rim-q" id="rQForm" role="search"><svg class="ico"><use href="#i-search"/></svg><input class="input" type="search" id="rQ" maxlength="80" autocomplete="off" data-i18n-ph="rims.q" data-i18n-aria="rims.qAria"></form>
+        <div class="toolbar">
+          <div class="count" id="rCount">—</div>
+          <div class="tb-right">
+            <button class="btn btn-line btn-sm filter-btn" id="rfOpen"><svg class="ico sm"><use href="#i-sliders"/></svg><span data-i18n="f.filters"></span> <span class="count-pill" id="rfCount" data-n="0"></span></button>
+            <label class="sr" for="rSort" data-i18n="sort.label"></label>
+            <select class="select sort" id="rSort">
+              <option value="new" data-i18n="sort.new"></option>
+              <option value="pasc" data-i18n="sort.pasc"></option>
+              <option value="pdesc" data-i18n="sort.pdesc"></option>
+            </select>
+          </div>
+        </div>
+        <div class="chips" id="rChips"></div>
+      </div>
+      <div class="grid g3" id="rGrid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= VEHICLE DETAIL (also used for a rim listing: #/rim/:id) ================= -->
 <section class="view" data-view="car"><div class="wrap" id="carView"></div></section>
 
 <!-- ================= TRADE-IN / WE BUY YOUR CAR (shared wizard) ================= -->
@@ -467,7 +519,7 @@
         <ul id="ftrContact"></ul>
         <div class="social" id="ftrSocial" hidden style="margin-top:16px"></div>
       </div>
-      <div><h2 data-i18n="ftr.cars"></h2><ul><li><a href="#/search" data-i18n="nav.cars"></a></li><li><a href="#/search" data-i18n="sv.td.title"></a></li><li><a href="#/favourites" data-i18n="nav.favs"></a></li></ul></div>
+      <div><h2 data-i18n="ftr.cars"></h2><ul><li><a href="#/search" data-i18n="nav.cars"></a></li><li><a href="#/rims" data-i18n="nav.rims"></a></li><li><a href="#/search" data-i18n="sv.td.title"></a></li><li><a href="#/favourites" data-i18n="nav.favs"></a></li></ul></div>
       <div><h2 data-i18n="k.services"></h2><ul><li><a href="#/financim?tab=leasing">Leasing</a></li><li><a href="#/financim" data-i18n="svc.fin"></a></li><li><a href="#/nderrim" data-i18n="nav.tradeLong"></a></li><li><a href="#/blejme" data-i18n="nav.buyLong"></a></li><li><a href="#/?s=dergesa" data-i18n="nav.delivery"></a></li></ul></div>
       <div><h2>NEXT CARS SA</h2><ul><li><a href="#/?s=garancia" data-i18n="nav.warranty"></a></li><li id="ftrReviews" hidden><a href="#/?s=vleresimet" data-i18n="k.reviews"></a></li><li><a href="#/kontakt" data-i18n="nav.contact"></a></li></ul></div>
       <div><h2 data-i18n="ftr.legal"></h2><ul><li><a href="#" data-info="imprint" data-i18n="ftr.imprint"></a></li><li><a href="#" data-info="privacy" data-i18n="ftr.privacy"></a></li></ul></div>
@@ -508,6 +560,7 @@
 </form>
 <script src="assets/js/config.js"></script>
 <script src="assets/js/vehicles.js"></script>
+<script src="assets/js/rims.js"></script>
 <script src="assets/js/inventory.js"></script>
 <script src="assets/js/i18n.js"></script>
 <script src="assets/js/app.js"></script>

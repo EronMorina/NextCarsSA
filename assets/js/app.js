@@ -75,7 +75,7 @@ const hasWa = () => !!digits(BUSINESS.whatsapp);
 const waBtn = (v, cls = 'btn btn-wa', label = 'WhatsApp') => !hasWa() ? '' : `<a class="${cls}" data-wa href="${esc(waLink(waVehicleText(v)))}" target="_blank" rel="noopener">${icoF('wa')}${label}</a>`;
 
 /* ---------- App state (in memory) ---------- */
-const state = { favs: new Set(), seg: 'all' };
+const state = { favs: new Set(), rimFavs: new Set(), seg: 'all' };
 const DEF = () => ({ q: '', make: [], model: '', pmin: 0, pmax: 0, ymin: 0, ymax: 0, km: 0, fuel: [], trans: [], psmin: 0, body: [], drive: [], color: [], premium: false });
 let F = DEF();
 let sortKey = 'rec';
@@ -153,15 +153,15 @@ function card(v) {
 const skeleton = n => Array.from({ length: n }, () => `<div class="card skc"><div class="media sk" style="border-radius:0"></div><div class="c-body"><div class="sk" style="height:18px;width:70%"></div><div class="sk" style="height:13px;width:45%"></div><div class="sk" style="height:46px"></div><div class="sk" style="height:24px;width:55%;margin-top:8px"></div></div></div>`).join('');
 
 /* ---------- Favourites ---------- */
-function toggleFav(id) {
-  id = +id; const on = !state.favs.has(id);
-  on ? state.favs.add(id) : state.favs.delete(id);
-  $$(`[data-fav="${id}"]`).forEach(b => { b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); const l = b.querySelector('.fl'); if (l) l.textContent = t(on ? 'fav.btnSaved' : 'fav.btnSave'); if (b.classList.contains('fav-inline')) b.style.color = on ? 'var(--gold-ink)' : ''; });
+function toggleFav(id, kind = 'car') {
+  id = +id; const set = kind === 'rim' ? state.rimFavs : state.favs, attr = kind === 'rim' ? 'data-rfav' : 'data-fav', on = !set.has(id);
+  on ? set.add(id) : set.delete(id);
+  $$(`[${attr}="${id}"]`).forEach(b => { b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); const l = b.querySelector('.fl'); if (l) l.textContent = t(on ? 'fav.btnSaved' : 'fav.btnSave'); if (b.classList.contains('fav-inline')) b.style.color = on ? 'var(--gold-ink)' : ''; });
   updateFavCount();
   toast(t(on ? 'fav.saved' : 'fav.removed'), on ? 'heart' : 'x');
   if (currentView === 'favourites') renderFavs();
 }
-function updateFavCount() { $$('[data-favcount]').forEach(e => { e.textContent = state.favs.size || ''; e.dataset.n = state.favs.size; }); }
+function updateFavCount() { const n = state.favs.size + state.rimFavs.size; $$('[data-favcount]').forEach(e => { e.textContent = n || ''; e.dataset.n = n; }); }
 
 /* ---------- Options helpers ---------- */
 const PRICE_STEPS = [10000, 15000, 20000, 25000, 30000, 40000, 50000, 60000, 75000, 100000, 150000, 200000, 300000];
@@ -299,6 +299,8 @@ function renderHome() {
   const featured = byIds([3, 1, 8, 11, 13, 7, 2, 14]);
   $('#featuredGrid').innerHTML = (featured.length ? featured : VEHICLES.slice(0, 8)).map(card).join('');
   $('#recentRail').innerHTML = [...VEHICLES].sort(SORTS.new).slice(0, 8).map(card).join('');
+  const homeRims = RIMS.filter(rimOnSale).sort(RSORTS.new).slice(0, 8);
+  $('#rimsHome').hidden = !homeRims.length; $('#rimRail').innerHTML = homeRims.map(rimCard).join('');
   const extra = (typeof HOME_EXTRA_BRANDS !== 'undefined' ? HOME_EXTRA_BRANDS : []).filter(b => !MAKES.includes(b));
   const brands = [...[...MAKES].sort((a, b) => countBy('make', b) - countBy('make', a) || a.localeCompare(b)), ...extra].slice(0, 10);
   $('#brandGrid').innerHTML = brands.map(b => `<button class="brand" data-brand="${esc(b)}"><div><div class="brand-name">${esc(b)}</div><div class="brand-count">${nVeh(countBy('make', b))}</div></div><span class="mono">${ico('arrow', 'sm')}</span></button>`).join('');
@@ -433,8 +435,10 @@ function initSearch() {
   $('#fClose').addEventListener('click', () => openFilters(false));
   $('#fApply').addEventListener('click', () => { openFilters(false); window.scrollTo({ top: 0, behavior: 'smooth' }); });
 }
-function openFilters(open) {
-  $('#filters').classList.toggle('open', open);
+/* car (#filters) and rim (#rFilters) filter panels — slide-up sheet on mobile */
+const anyFiltersOpen = () => $('#filters').classList.contains('open') || $('#rFilters').classList.contains('open');
+function openFilters(open, sel = '#filters') {
+  if (open) $(sel).classList.add('open'); else { $('#filters').classList.remove('open'); $('#rFilters').classList.remove('open'); }
   $('#scrim').classList.toggle('open', open);
   document.body.style.overflow = open ? 'hidden' : '';
 }
@@ -445,7 +449,7 @@ function renderCar(id) {
   const v = byId(id), root = $('#carView');
   if (!v) { root.innerHTML = `<div class="empty" style="margin:40px 0"><div class="e-ic">${ico('car')}</div><h2>${t('det.notFound')}</h2><p>${t('det.notFoundP')}</p><div class="row"><a class="btn btn-dark" href="#/search">${t('nav.cars')}</a></div></div>`; $('#mbar').innerHTML = ''; return; }
   G = { v, i: 0 };
-  const fav = state.favs.has(v.id), addr = addrLine();
+  const fav = state.favs.has(v.id);
   const similar = VEHICLES.filter(x => x.id !== v.id).map(x => [x, (x.body === v.body ? 2 : 0) + (x.make === v.make ? 2 : 0) + (Math.abs(x.price - v.price) < v.price * 0.35 ? 1.5 : 0)]).sort((a, b) => b[1] - a[1]).slice(0, 8).map(x => x[0]);
   const isEV = v.fuel === 'Electric';
   const warranty = warrantyOf(v), insp = inspLabel(v);
@@ -455,18 +459,8 @@ function renderCar(id) {
   const showF = 12;
   const featItem = f => `<li><span class="ck">${ico('check')}</span>${esc(f)}</li>`;
   const phoneBtn = cls => BUSINESS.phone ? `<a class="${cls}" href="${telHref()}">${ico('phone')}${t('btn.call')}</a>` : '';
-  const dealerBox = () => `
-      <div class="dealer-head"><img src="${LOGO_SRC}" alt="NEXT CARS SA"></div>
-      <div class="seller-list">
-        ${addr ? `<span>${ico('pin', 'sm')}${esc(addr)}</span>` : ''}
-        <span>${ico('cal', 'sm')}<b style="font-weight:600">${t('appt')}</b></span>
-        ${BUSINESS.phone ? `<span>${ico('phone', 'sm')}<a href="${telHref()}">${esc(BUSINESS.phone)}</a></span>` : ''}
-      </div>
-      <div class="btns" style="display:grid;gap:10px">
-        ${waBtn(v, 'btn btn-wa', t('dealer.askWa'))}
-        ${phoneBtn('btn btn-line')}
-        <a class="btn btn-ghost" href="#/kontakt">${ico('pin')}${t('dealer.contact')}</a>
-      </div>`;
+  const dealerBox = () => dealerBoxHtml(waBtn(v, 'btn btn-wa', t('dealer.askWa')));
+  const fitRims = RIMS.filter(r => rimOnSale(r) && rimFitsCar(r, v)).slice(0, 8);
   const priceBlock = cls => `<div class="pbox ${cls}">
       <h1>${esc(v.title)}</h1><div class="variant">${esc(v.variant)}</div>
       <div class="bigprice num"><small>CHF</small>${fmt(v.price)}</div>
@@ -497,17 +491,7 @@ function renderCar(id) {
   </div>
   <div class="det">
     <div>
-      <div class="gallery">
-        <div class="g-main" id="gMain">
-          <img id="gImg" src="${esc(gsrc(v.gallery[0], 1400, 875))}" alt="${esc(v.title)}" data-fb>
-          <div class="badges">${badgeHtml(v)}</div>
-          <button class="g-nav g-prev" data-g="-1" aria-label="${esc(t('det.prevImg'))}">${ico('left')}</button>
-          <button class="g-nav g-next" data-g="1" aria-label="${esc(t('det.nextImg'))}">${ico('right')}</button>
-          <button class="icon-btn g-full" id="gFull" style="background:rgba(255,255,255,.92)" aria-label="${esc(t('det.fullscreen'))}">${ico('expand')}</button>
-          <span class="g-count">${ico('camera', 'sm')}<span id="gCount">1 / ${v.gallery.length}</span></span>
-        </div>
-        <div class="thumbs" id="thumbs">${v.gallery.map((g, i) => `<button class="thumb ${i ? '' : 'on'}" data-t="${i}" aria-label="${esc(t('det.img', { n: i + 1 }))}">${imgEl(gsrc(g, 240, 180), '', true)}</button>`).join('')}</div>
-      </div>
+      ${galleryHtml(v, badgeHtml(v))}
       ${priceBlock('pbox-mobile-only')}
       <div class="dbox"><h2>${t('det.keyfacts')}</h2><div class="keyfacts">${kf.map(k => `<div class="kf">${ico(k[0])}<span>${k[1]}</span><b>${esc(k[2])}</b></div>`).join('')}</div></div>
       <div class="dbox desc"><h2>${t('det.desc')}</h2><p>${esc(loc(v.desc))}</p><p style="color:var(--muted);font-size:14px">${t('det.descNote')}</p>${hl.length ? `<div class="hl">${hl.map(h => `<span class="tagline">${ico('check')}${esc(h)}</span>`).join('')}</div>` : ''}</div>
@@ -545,17 +529,16 @@ function renderCar(id) {
       <div class="pbox pbox-desktop-only">${dealerBox()}</div>
     </aside>
   </div>
+  ${fitRims.length ? `<section style="padding-bottom:28px">
+    <div class="sec-head"><div><span class="kicker">${t('nav.rims')}</span><h2 style="font-size:24px">${t('rims.matching')}</h2></div><div class="rail-nav" data-rail="fitRail"><button aria-label="${esc(t('aria.prev'))}">${ico('left')}</button><button aria-label="${esc(t('aria.next'))}">${ico('right')}</button></div></div>
+    <div class="rail" id="fitRail">${fitRims.map(rimCard).join('')}</div>
+  </section>` : ''}
   <section style="padding-bottom:80px">
     <div class="sec-head"><div><h2 style="font-size:24px">${t('det.similar')}</h2></div><div class="rail-nav" data-rail="simRail"><button aria-label="${esc(t('aria.prev'))}">${ico('left')}</button><button aria-label="${esc(t('aria.next'))}">${ico('right')}</button></div></div>
     <div class="rail" id="simRail">${similar.map(card).join('')}</div>
   </section>`;
 
-  // Gallery
-  $('#gMain').addEventListener('click', e => { const n = e.target.closest('[data-g]'); if (n) { e.stopPropagation(); setG(G.i + +n.dataset.g); } else if (e.target.closest('#gFull') || e.target.id === 'gImg') openLB(); });
-  $('#thumbs').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (b) setG(+b.dataset.t); });
-  let x0 = null; const gm = $('#gMain');
-  gm.addEventListener('touchstart', e => x0 = e.touches[0].clientX, { passive: true });
-  gm.addEventListener('touchend', e => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 40) setG(G.i + (dx < 0 ? 1 : -1)); x0 = null; });
+  bindGallery();
   const fm = $('#featMore'); if (fm) fm.addEventListener('click', () => { $('#featList').innerHTML = feats.map(featItem).join(''); fm.remove(); });
   $('#backBtn').addEventListener('click', () => { if (history.length > 1 && prevRoute) history.back(); else go('#/search'); });
   $('#shareBtn').addEventListener('click', () => share(v));
@@ -595,11 +578,363 @@ function closeLB() {
   if (lbReturn && document.contains(lbReturn)) lbReturn.focus({ preventScroll: true }); lbReturn = null;
 }
 function lbPaint() { $('#lbImg').src = gsrc(G.v.gallery[G.i], 1920, 1200); $('#lbCount').textContent = `${G.v.title} · ${G.i + 1} / ${G.v.gallery.length}`; }
-async function share(v) {
-  const url = vehicleUrl(v), data = { title: `${v.title} ${v.variant} – NEXT CARS SA`, text: `${v.title} ${v.variant} – ${chf(v.price)}`, url };
+/* Gallery + dealer box shared by the car and rim detail pages (G.v = the item shown) */
+function galleryHtml(v, badges) {
+  return `<div class="gallery">
+        <div class="g-main" id="gMain">
+          <img id="gImg" src="${esc(gsrc(v.gallery[0], 1400, 875))}" alt="${esc(v.title)}" data-fb>
+          <div class="badges">${badges}</div>
+          <button class="g-nav g-prev" data-g="-1" aria-label="${esc(t('det.prevImg'))}">${ico('left')}</button>
+          <button class="g-nav g-next" data-g="1" aria-label="${esc(t('det.nextImg'))}">${ico('right')}</button>
+          <button class="icon-btn g-full" id="gFull" style="background:rgba(255,255,255,.92)" aria-label="${esc(t('det.fullscreen'))}">${ico('expand')}</button>
+          <span class="g-count">${ico('camera', 'sm')}<span id="gCount">1 / ${v.gallery.length}</span></span>
+        </div>
+        <div class="thumbs" id="thumbs">${v.gallery.map((g, i) => `<button class="thumb ${i ? '' : 'on'}" data-t="${i}" aria-label="${esc(t('det.img', { n: i + 1 }))}">${imgEl(gsrc(g, 240, 180), '', true)}</button>`).join('')}</div>
+      </div>`;
+}
+function bindGallery() {
+  $('#gMain').addEventListener('click', e => { const n = e.target.closest('[data-g]'); if (n) { e.stopPropagation(); setG(G.i + +n.dataset.g); } else if (e.target.closest('#gFull') || e.target.id === 'gImg') openLB(); });
+  $('#thumbs').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (b) setG(+b.dataset.t); });
+  let x0 = null; const gm = $('#gMain');
+  gm.addEventListener('touchstart', e => x0 = e.touches[0].clientX, { passive: true });
+  gm.addEventListener('touchend', e => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 40) setG(G.i + (dx < 0 ? 1 : -1)); x0 = null; });
+}
+function dealerBoxHtml(waHtml) {
+  const addr = addrLine();
+  return `
+      <div class="dealer-head"><img src="${LOGO_SRC}" alt="NEXT CARS SA"></div>
+      <div class="seller-list">
+        ${addr ? `<span>${ico('pin', 'sm')}${esc(addr)}</span>` : ''}
+        <span>${ico('cal', 'sm')}<b style="font-weight:600">${t('appt')}</b></span>
+        ${BUSINESS.phone ? `<span>${ico('phone', 'sm')}<a href="${telHref()}">${esc(BUSINESS.phone)}</a></span>` : ''}
+      </div>
+      <div class="btns" style="display:grid;gap:10px">
+        ${waHtml}
+        ${BUSINESS.phone ? `<a class="btn btn-line" href="${telHref()}">${ico('phone')}${t('btn.call')}</a>` : ''}
+        <a class="btn btn-ghost" href="#/kontakt">${ico('pin')}${t('dealer.contact')}</a>
+      </div>`;
+}
+const share = v => shareLink(vehicleUrl(v), `${v.title} ${v.variant} – NEXT CARS SA`, `${v.title} ${v.variant} – ${chf(v.price)}`);
+async function shareLink(url, title, text) {
+  const data = { title, text, url };
   try { if (navigator.share && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) { await navigator.share(data); return; } } catch (e) { return; }
   try { await navigator.clipboard.writeText(url); } catch (e) { /* clipboard unavailable (e.g. file://) */ }
   toast(t('det.linkCopied'), 'link');
+}
+
+/* =====================================================================
+   RIMS / FELGEN — listings of NEXT CARS SA (assets/js/rims.js), built on the
+   same patterns as the cars: cards, filters + chips, detail page, favourites, requests.
+   ===================================================================== */
+const rimById = id => RIMS.find(r => r.id === +id);
+const rimLive = r => r.status !== 'hidden';            // shown on the site (on sale + sold)
+const rimOnSale = r => r.status === 'active';
+const rimUrl = r => `${location.href.split(/[?#]/)[0]}#/rim/${r.id}`;
+const money = (n, cur = 'CHF') => `${cur} ${fmt(n)}`;
+const nRim = n => `${n} ${t(n === 1 ? 'rim.one' : 'rim.many')}`;
+const rimQty = r => r.qty === 1 ? t('rim.qty1') : t('rim.qtyN', { n: r.qty });
+const rimDim = r => `${r.size}″ × ${r.width} J`;
+const rimFits = r => r.fits.map(f => [f.make, f.model, f.years].filter(Boolean).join(' '));
+const dateCH = iso => { const [y, m, d] = String(iso).split('-'); return d ? `${d}.${m}.${y}` : iso; };
+const RIM_PRICE_STEPS = [100, 200, 300, 500, 750, 1000, 1500, 2000, 3000, 5000];
+const ET_STEPS = [-10, 0, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60];
+/* does a rim list this car (make + model) among the cars it fits? */
+function rimFitsCar(r, v) {
+  const lc = s => String(s || '').toLowerCase();
+  return r.fits.some(f => lc(f.make) === lc(v.make) && (!f.model || lc(v.model).includes(lc(f.model).split(' ')[0]) || lc(f.model).includes(lc(v.model))));
+}
+
+/* ---------- Search + filters ---------- */
+function rimHay(r) { return `${r.title} ${r.brand} ${r.size} ${r.size}" ${r.size}″ ${r.width}j ${r.width} ${r.pcd} et${r.et} et ${r.et} ${r.material} ${L.rimMat[r.material]} ${L.rimCond[r.condition]} ${rimFits(r).join(' ')} ${r.location || ''} ${loc(r.desc)}`.toLowerCase(); }
+const RDEF = () => ({ q: '', brand: [], size: [], width: [], pcd: [], cond: [], etmin: '', etmax: '', pmin: 0, pmax: 0, make: '', model: '', loc: '' });
+let RF = RDEF(), rSortKey = 'new';
+function rimMatch(r, f = RF) {
+  if (!rimLive(r)) return false;
+  if (f.q) { const h = rimHay(r); if (!f.q.toLowerCase().split(/\s+/).filter(Boolean).every(x => h.includes(SYN[x] || x))) return false; }
+  if (f.brand.length && !f.brand.includes(r.brand)) return false;
+  if (f.size.length && !f.size.includes(String(r.size))) return false;
+  if (f.width.length && !f.width.includes(String(r.width))) return false;
+  if (f.pcd.length && !f.pcd.includes(r.pcd)) return false;
+  if (f.cond.length && !f.cond.includes(r.condition)) return false;
+  if (f.etmin !== '' && r.et < +f.etmin) return false;
+  if (f.etmax !== '' && r.et > +f.etmax) return false;
+  if (f.pmin && r.price < f.pmin) return false;
+  if (f.pmax && r.price > f.pmax) return false;
+  if (f.make && !r.fits.some(x => x.make === f.make && (!f.model || x.model === f.model))) return false;
+  if (f.loc && r.location !== f.loc) return false;
+  return true;
+}
+const rimResults = (f = RF) => RIMS.filter(r => rimMatch(r, f));
+const RSORTS = { new: (a, b) => b.listed.localeCompare(a.listed) || b.id - a.id, pasc: (a, b) => a.price - b.price, pdesc: (a, b) => b.price - a.price };
+/* sold listings always come last */
+const rimSort = (list, key = rSortKey) => list.sort((a, b) => (a.status === 'sold') - (b.status === 'sold') || RSORTS[key](a, b));
+function parseRimQuery(q) {
+  const f = RDEF(), p = new URLSearchParams(q);
+  ['brand', 'size', 'width', 'pcd', 'cond'].forEach(k => { if (p.get(k)) f[k] = p.get(k).split(','); });
+  ['pmin', 'pmax'].forEach(k => { if (p.get(k)) f[k] = +p.get(k) || 0; });
+  ['etmin', 'etmax'].forEach(k => { const v = p.get(k); if (v !== null && v !== '' && !isNaN(+v)) f[k] = String(+v); });
+  ['q', 'make', 'model', 'loc'].forEach(k => { if (p.get(k)) f[k] = p.get(k).slice(0, 80); });
+  return f;
+}
+
+/* ---------- Card ---------- */
+function rimBadges(r) {
+  return (r.status === 'sold' ? `<span class="badge sold">${t('rim.sold')}</span>` : '') + `<span class="badge ${r.condition === 'new' ? 'new' : ''}">${esc(L.rimCond[r.condition])}</span>`;
+}
+function rimCard(r) {
+  const fav = state.rimFavs.has(r.id), price = money(r.price, r.currency);
+  return `<article class="card ${r.status === 'sold' ? 'is-sold' : ''}" data-rim="${r.id}">
+    <div class="media">
+      ${imgEl(IMG(r.img, 640, 480), r.title)}
+      <div class="badges">${rimBadges(r)}</div>
+      <button class="fav ${fav ? 'on' : ''}" data-rfav="${r.id}" aria-label="${esc(t(fav ? 'fav.remove' : 'fav.save'))}" aria-pressed="${fav}"><svg><use href="#i-heart"/></svg></button>
+      <span class="imgcount">${ico('camera')}${r.photos.length}</span>
+    </div>
+    <div class="c-body">
+      <div><div class="c-title"><a class="c-link" href="#/rim/${r.id}">${esc(r.title)}<span class="sr">, ${price}</span></a></div><div class="c-var">${esc(r.brand)} · ${esc(L.rimMat[r.material])}</div></div>
+      <div class="specs">
+        <span>${ico('rim')}${rimDim(r)}</span>
+        <span>${ico('gear')}${esc(r.pcd)}</span>
+        <span>${ico('sliders')}ET ${r.et}</span>
+        <span>${ico('tag')}${rimQty(r)}</span>
+        ${r.location ? `<span class="span2">${ico('pin')}${esc(r.location)}</span>` : ''}
+      </div>
+      <div class="c-foot"><div><div class="price num">${price}</div></div></div>
+    </div>
+  </article>`;
+}
+
+/* ---------- List page (#/rims) ---------- */
+function renderRimFilters() {
+  const live = RIMS.filter(rimLive);
+  const uniq = fn => [...new Set(live.flatMap(r => [].concat(fn(r))).filter(x => x !== '' && x != null))];
+  const byNum = (a, b) => a - b, byTxt = (a, b) => String(a).localeCompare(String(b));
+  const facet = (k, v) => rimResults({ ...RF, [k]: [v] }).length;
+  const check = (k, v, lab = v) => { const n = facet(k, v), on = RF[k].includes(v); return `<label class="check ${!n && !on ? 'dis' : ''}"><input type="checkbox" data-rf="${k}" value="${esc(v)}" ${on ? 'checked' : ''}><span>${esc(lab)}</span><small>${n}</small></label>`; };
+  const pill = (k, v, lab = v) => `<button type="button" class="pill ${RF[k].includes(v) ? 'on' : ''}" data-rpill="${k}" data-v="${esc(v)}" aria-pressed="${RF[k].includes(v)}">${esc(lab)}</button>`;
+  const sec = (label, html) => `<div class="f-sec"><span class="flabel">${label}</span>${html}</div>`;
+  const makes = uniq(r => r.fits.map(f => f.make)).sort(byTxt);
+  const models = RF.make ? uniq(r => r.fits.filter(f => f.make === RF.make).map(f => f.model || '')).sort(byTxt) : [];
+  const locs = uniq(r => r.location || '').sort(byTxt);
+  $('#rfBody').innerHTML = [
+    sec(t('rf.brand'), `<div class="checks">${uniq(r => r.brand).sort(byTxt).map(b => check('brand', b)).join('')}</div>`),
+    sec(t('rf.size'), `<div class="pills">${uniq(r => r.size).sort(byNum).map(s => pill('size', String(s), `${s}″`)).join('')}</div>`),
+    sec(t('rf.width'), `<div class="pills">${uniq(r => r.width).sort(byNum).map(w => pill('width', String(w), `${w} J`)).join('')}</div>`),
+    sec(t('rf.pcd'), `<div class="checks">${uniq(r => r.pcd).sort(byTxt).map(p => check('pcd', p)).join('')}</div>`),
+    sec(t('rf.et'), `<div class="f-row"><select class="select" data-rs="etmin" aria-label="${esc(t('rf.etFrom'))}">${opts(t('f.from'), ET_STEPS, RF.etmin, x => 'ET ' + x)}</select><select class="select" data-rs="etmax" aria-label="${esc(t('rf.etTo'))}">${opts(t('f.to'), ET_STEPS, RF.etmax, x => 'ET ' + x)}</select></div>`),
+    sec(t('rf.price'), `<div class="f-row"><select class="select" data-rs="pmin" aria-label="${esc(t('f.priceFrom'))}">${opts(t('f.from'), RIM_PRICE_STEPS, RF.pmin || '', fmt)}</select><select class="select" data-rs="pmax" aria-label="${esc(t('f.priceTo'))}">${opts(t('f.to'), RIM_PRICE_STEPS, RF.pmax || '', fmt)}</select></div>`),
+    sec(t('rf.cond'), `<div class="pills">${RIM_CONDITIONS.map(c => pill('cond', c, L.rimCond[c])).join('')}</div>`),
+    makes.length ? sec(t('rf.fits'), `<select class="select" data-rs="make" aria-label="${esc(t('rf.carMake'))}">${opt('', `${t('rf.carMake')}: ${t('opt.any')}`, RF.make)}${makes.map(m => opt(m, m, RF.make)).join('')}</select><select class="select" data-rs="model" aria-label="${esc(t('rf.carModel'))}" style="margin-top:8px" ${RF.make ? '' : 'disabled'}>${opt('', RF.make ? t('opt.anyModel') : t('f.selectMakeFirst'), RF.model)}${models.filter(Boolean).map(m => opt(m, m, RF.model)).join('')}</select>`) : '',
+    locs.length > 1 ? sec(t('rf.location'), `<select class="select" data-rs="loc" aria-label="${esc(t('rf.location'))}">${opts(t('opt.any'), locs, RF.loc)}</select>`) : ''
+  ].join('');
+}
+function rimChips() {
+  const c = [], drop = (k, v) => () => { RF[k] = RF[k].filter(x => x !== v); };
+  if (RF.q) c.push([`“${RF.q}”`, () => { RF.q = ''; $('#rQ').value = ''; }]);
+  RF.brand.forEach(v => c.push([v, drop('brand', v)]));
+  RF.size.forEach(v => c.push([`${v}″`, drop('size', v)]));
+  RF.width.forEach(v => c.push([`${v} J`, drop('width', v)]));
+  RF.pcd.forEach(v => c.push([v, drop('pcd', v)]));
+  if (RF.etmin !== '' || RF.etmax !== '') c.push([`ET ${RF.etmin !== '' ? RF.etmin : '…'} – ${RF.etmax !== '' ? RF.etmax : '…'}`, () => { RF.etmin = ''; RF.etmax = ''; }]);
+  if (RF.pmin) c.push([t('f.fromX', { x: fmt(RF.pmin) }), () => { RF.pmin = 0; }]);
+  if (RF.pmax) c.push([t('f.upTo', { x: fmt(RF.pmax) }), () => { RF.pmax = 0; }]);
+  RF.cond.forEach(v => c.push([L.rimCond[v], drop('cond', v)]));
+  if (RF.make) c.push([`${RF.make}${RF.model ? ' ' + RF.model : ''}`, () => { RF.make = ''; RF.model = ''; }]);
+  if (RF.loc) c.push([RF.loc, () => { RF.loc = ''; }]);
+  return c;
+}
+let rChipFns = [];
+function renderRimResults(withSkeleton = true) {
+  const none = !RIMS.some(rimLive), list = rimSort(rimResults());
+  const chips = rimChips(); rChipFns = chips.map(c => c[1]);
+  $('#rWrap').classList.toggle('solo', none); $('#rFilters').hidden = none; $('#rTools').hidden = none;
+  $('#rChips').innerHTML = chips.map((c, i) => `<span class="chip">${esc(c[0])}<button data-rchip="${i}" aria-label="${esc(t('chip.remove'))} ${esc(c[0])}">${ico('x')}</button></span>`).join('') + (chips.length ? `<button class="clear-all" data-rclear>${t('chip.clearAll')}</button>` : '');
+  $('#rfCount').textContent = chips.length || ''; $('#rfCount').dataset.n = chips.length;
+  $('#rCount').innerHTML = `${nRim(list.length)} <span>${t(list.length === 1 ? 'rims.found1' : 'rims.foundN')}</span>`;
+  $('#rfApply').textContent = t('f.showN', { n: list.length });
+  $('#rTitle').textContent = RF.brand.length === 1 ? t('rims.titleBrand', { brand: RF.brand[0] }) : t('nav.rims');
+  $('#rCrumbLast').textContent = RF.brand.length === 1 ? RF.brand[0] : chips.length ? t('crumb.results') : t('crumb.all');
+  const grid = $('#rGrid');
+  const ask = `<button class="btn btn-primary" data-lead="rim">${ico('msg')}${t('lead.rim.title')}</button>${BUSINESS.phone ? `<a class="btn btn-line" href="${telHref()}">${ico('phone')}${t('btn.call')}</a>` : ''}`;
+  const paint = () => {
+    if (none) { grid.innerHTML = `<div class="empty"><div class="e-ic">${ico('rim')}</div><h2>${t('rims.emptyT')}</h2><p>${t('rims.emptyP')}</p><div class="row">${ask}</div></div>`; return; }
+    if (!list.length) { grid.innerHTML = `<div class="empty"><div class="e-ic">${ico('search')}</div><h2>${t('rims.noMatchT')}</h2><p>${t('rims.noMatchP')}</p><div class="row"><button class="btn btn-dark" data-rclear>${t('empty.clear')}</button>${ask}</div></div>`; return; }
+    grid.innerHTML = list.map(rimCard).join('');
+  };
+  if (withSkeleton && !none) { grid.innerHTML = skeleton(Math.min(Math.max(list.length, 3), 6)); clearTimeout(renderRimResults.tm); renderRimResults.tm = setTimeout(paint, 320); }
+  else paint();
+}
+function refreshRims(skel = true) { renderRimFilters(); renderRimResults(skel); }
+function initRims() {
+  $('#rSort').addEventListener('change', e => { rSortKey = e.target.value; renderRimResults(); });
+  let qt;
+  $('#rQ').addEventListener('input', e => { clearTimeout(qt); qt = setTimeout(() => { RF.q = e.target.value.trim().slice(0, 80); refreshRims(false); }, 220); });
+  $('#rQForm').addEventListener('submit', e => { e.preventDefault(); clearTimeout(qt); RF.q = $('#rQ').value.trim().slice(0, 80); refreshRims(false); });
+  const fb = $('#rfBody');
+  fb.addEventListener('change', e => {
+    const el = e.target;
+    if (el.dataset.rf) { const k = el.dataset.rf; RF[k] = el.checked ? [...RF[k], el.value] : RF[k].filter(x => x !== el.value); }
+    if (el.dataset.rs) { const k = el.dataset.rs; RF[k] = ['etmin', 'etmax', 'make', 'model', 'loc'].includes(k) ? el.value : (+el.value || 0); if (k === 'make') RF.model = ''; }
+    refreshRims();
+  });
+  fb.addEventListener('click', e => {
+    const p = e.target.closest('[data-rpill]');
+    if (p) { const k = p.dataset.rpill, v = p.dataset.v; RF[k] = RF[k].includes(v) ? RF[k].filter(x => x !== v) : [...RF[k], v]; refreshRims(); }
+  });
+  $('#rChips').addEventListener('click', e => { const b = e.target.closest('[data-rchip]'); if (b) { rChipFns[+b.dataset.rchip](); refreshRims(); } });
+  $('#rfOpen').addEventListener('click', () => openFilters(true, '#rFilters'));
+  $('#rfClose').addEventListener('click', () => openFilters(false));
+  $('#rfApply').addEventListener('click', () => { openFilters(false); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+}
+
+/* ---------- Detail page (#/rim/:id) — rendered into the vehicle detail view, reusing its gallery ---------- */
+function renderRim(id) {
+  const r = rimById(id), root = $('#carView');
+  if (!r || !rimLive(r)) {
+    root.innerHTML = `<div class="empty" style="margin:40px 0"><div class="e-ic">${ico('rim')}</div><h2>${t('rim.notFound')}</h2><p>${t('rim.notFoundP')}</p><div class="row"><a class="btn btn-dark" href="#/rims">${t('rims.viewAll')}</a><button class="btn btn-line" data-lead="rim">${ico('msg')}${t('lead.rim.title')}</button></div></div>`;
+    $('#mbar').innerHTML = ''; return;
+  }
+  G = { v: r, i: 0 };
+  const fav = state.rimFavs.has(r.id), sold = r.status === 'sold', price = money(r.price, r.currency), desc = loc(r.desc), fits = rimFits(r);
+  const kf = [['rim', t('rf.size'), rimDim(r)], ['gear', t('rf.pcd'), r.pcd], ['sliders', t('rf.et'), `ET ${r.et}`], ['palette', t('rf.cb'), r.cb ? `${r.cb} mm` : '—'], ['tag', t('rf.qty'), rimQty(r)], ['clip', t('rf.cond'), L.rimCond[r.condition]]];
+  const specs = [[t('rf.brand'), r.brand], [t('rf.size'), `${r.size}″`], [t('rf.width'), `${r.width} J`], [t('rf.pcd'), r.pcd], [t('rf.et'), `ET ${r.et}`], [t('rf.cb'), r.cb ? `${r.cb} mm` : '—'], [t('rf.material'), L.rimMat[r.material]], [t('rf.cond'), L.rimCond[r.condition]], [t('rf.qty'), rimQty(r)], ...(r.location ? [[t('rf.location'), r.location]] : []), [t('rim.listed'), dateCH(r.listed)], [t('rim.id'), 'NR-' + (510000 + r.id * 73)]];
+  const similar = RIMS.filter(x => x.id !== r.id && rimOnSale(x)).map(x => [x, (x.pcd === r.pcd ? 3 : 0) + (x.size === r.size ? 2 : 0) + (x.brand === r.brand ? 1 : 0)]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 8).map(x => x[0]);
+  const wa = cls => hasWa() ? `<a class="${cls}" data-wa href="${esc(waLink(tMsg('wa.rim', { rim: r.title, url: rimUrl(r) })))}" target="_blank" rel="noopener">${icoF('wa')}WhatsApp</a>` : '';
+  const call = cls => BUSINESS.phone ? `<a class="${cls}" href="${telHref()}">${ico('phone')}${t('btn.call')}</a>` : '';
+  const priceBlock = cls => `<div class="pbox ${cls}">
+      <h1>${esc(r.title)}</h1><div class="variant">${esc(r.brand)} · ${esc(L.rimMat[r.material])}</div>
+      <div class="bigprice num"><small>${r.currency}</small>${fmt(r.price)}</div>
+      <div class="tagrow">${sold ? `<span class="price-tag tag-sold">${t('rim.sold')}</span>` : ''}<span class="price-tag">${ico('clip', 'sm')}${esc(L.rimCond[r.condition])}</span><span class="price-tag" style="color:var(--gold-ink);background:var(--gold-50)">${ico('tag', 'sm')}${esc(rimQty(r))}</span></div>
+      <div class="mini-specs"><span>${ico('rim')}${rimDim(r)}</span><span>${ico('gear')}${esc(r.pcd)}</span><span>${ico('sliders')}ET ${r.et}</span>${r.cb ? `<span>${ico('palette')}${r.cb} mm</span>` : ''}${r.location ? `<span>${ico('pin')}${esc(r.location)}</span>` : ''}</div>
+      ${sold ? `<div class="notice" style="margin-bottom:14px">${ico('info')}<span>${t('rim.soldNote')}</span></div>` : ''}
+      <div class="act-grid">
+        <button class="btn btn-primary btn-lg full" data-lead="rim" data-rim="${r.id}">${ico('msg')}${t('lead.rim.title')}</button>
+        ${wa('btn btn-wa full')}
+        ${call('btn btn-line full')}
+      </div>
+    </div>`;
+  root.innerHTML = `
+  <div class="det-top">
+    <div style="display:flex;align-items:center;gap:10px;min-width:0">
+      <button class="btn btn-line btn-sm" id="backBtn">${ico('back', 'sm')}${t('det.back')}</button>
+      <div class="crumbs"><a href="#/">${t('nav.home')}</a>${ico('right')}<a href="#/rims">${t('nav.rims')}</a>${ico('right')}<a href="#/rims?brand=${encodeURIComponent(r.brand)}">${esc(r.brand)}</a>${ico('right')}<b>${esc(r.title)}</b></div>
+    </div>
+    <div class="det-actions">
+      <button class="btn btn-line btn-sm" id="shareBtn">${ico('share', 'sm')}<span class="hide-xs">${t('det.share')}</span></button>
+      <button class="btn btn-line btn-sm fav-inline ${fav ? 'on' : ''}" data-rfav="${r.id}" aria-pressed="${fav}" style="${fav ? 'color:var(--gold-ink)' : ''}">${ico('heart', 'sm')}<span class="fl">${t(fav ? 'fav.btnSaved' : 'fav.btnSave')}</span></button>
+    </div>
+  </div>
+  <div class="det">
+    <div>
+      ${galleryHtml(r, rimBadges(r))}
+      ${priceBlock('pbox-mobile-only')}
+      <div class="dbox"><h2>${t('det.keyfacts')}</h2><div class="keyfacts">${kf.map(k => `<div class="kf">${ico(k[0])}<span>${k[1]}</span><b>${esc(k[2])}</b></div>`).join('')}</div></div>
+      ${desc ? `<div class="dbox desc"><h2>${t('det.desc')}</h2><p>${esc(desc)}</p></div>` : ''}
+      ${fits.length ? `<div class="dbox"><h2>${t('rf.fits')}</h2><ul class="feat">${fits.map(f => `<li><span class="ck">${ico('check')}</span>${esc(f)}</li>`).join('')}</ul></div>` : ''}
+      <div class="dbox"><h2>${t('det.tech')}</h2><div class="spec-tbl">${specs.map(s => `<div><span>${s[0]}</span><b>${esc(s[1])}</b></div>`).join('')}</div>
+        <div class="notice" style="margin-top:18px">${ico('info')}<span>${t('rim.fitNote')}</span></div></div>
+      <div class="dbox pbox-mobile-only"><h2>NEXT CARS SA</h2>${dealerBoxHtml(wa('btn btn-wa'))}</div>
+    </div>
+    <aside class="aside">
+      ${priceBlock('pbox-desktop-only')}
+      <div class="pbox pbox-desktop-only">${dealerBoxHtml(wa('btn btn-wa'))}</div>
+    </aside>
+  </div>
+  ${similar.length ? `<section style="padding-bottom:80px">
+    <div class="sec-head"><div><h2 style="font-size:24px">${t('rims.similar')}</h2></div><div class="rail-nav" data-rail="simRail"><button aria-label="${esc(t('aria.prev'))}">${ico('left')}</button><button aria-label="${esc(t('aria.next'))}">${ico('right')}</button></div></div>
+    <div class="rail" id="simRail">${similar.map(rimCard).join('')}</div>
+  </section>` : '<div style="height:64px"></div>'}`;
+  bindGallery();
+  $('#backBtn').addEventListener('click', () => { if (history.length > 1 && prevRoute) history.back(); else go('#/rims'); });
+  $('#shareBtn').addEventListener('click', () => shareLink(rimUrl(r), `${r.title} – NEXT CARS SA`, `${r.title} – ${price}`));
+  $('#mbar').innerHTML = `<div class="mp"><b class="num">${price}</b><span>${esc(r.title)}</span></div>${wa('btn btn-wa')}<button class="btn btn-primary" data-lead="rim" data-rim="${r.id}">${ico('msg')}${t('lead.rim.submit')}</button>`;
+}
+
+/* ---------- Admin: rims tab ---------- */
+const RIM_RAW_KEYS = ['id', 'title', 'price', 'currency', 'brand', 'size', 'width', 'pcd', 'et', 'cb', 'material', 'condition', 'qty', 'fits', 'location', 'desc', 'photos', 'listed', 'status'];
+const rimRaw = r => { const o = {}; RIM_RAW_KEYS.forEach(k => { const x = r[k]; if (x === undefined || x === '' || (Array.isArray(x) && !x.length && k !== 'photos')) return; o[k] = x; }); return o; };
+function afterRimChange() { saveDraft(); ADMIN_DRAFT = true; renderHome(); paintAdminBar(); }
+function renderAdminRims(tabs) {
+  $('#admRoot').innerHTML = `${tabs}<div class="adm-tools">
+      <button class="btn btn-primary" data-adm="rim-new">${ico('plus')}${t('adm.rimNew')}</button>
+      <button class="btn btn-dark" data-adm="rim-download">${ico('download')}${t('adm.downloadRims')}</button>
+      <button class="btn btn-line" data-adm="rim-export">${ico('file')}${t('adm.exportJson')}</button>
+      <label class="btn btn-line">${ico('upload')}${t('adm.importJson')}<input type="file" accept="application/json,.json" data-adm-rimport hidden></label>
+      ${ADMIN_DRAFT ? `<button class="btn btn-ghost" data-adm="reset">${ico('x')}${t('adm.reset')}</button>` : ''}
+    </div>
+    ${ADMIN_DRAFT ? `<div class="notice" style="margin-bottom:14px">${ico('eye')}<span>${t('adm.draft')}</span></div>` : ''}
+    <p class="adm-count">${nRim(RIMS.length)}</p>
+    ${RIMS.length ? `<div class="adm-list">${RIMS.map(r => `<div class="adm-row">
+      <img src="${esc(IMG(r.img, 192, 144))}" alt="" data-fb>
+      <div class="adm-main"><b>${esc(r.title)}</b><span>${esc(r.brand)} · ${rimDim(r)} · ${esc(r.pcd)} · ET ${r.et}</span><small>${money(r.price, r.currency)} · ${rimQty(r)} · ID ${r.id}</small></div>
+      <label class="adm-status"><span>${t('adm.status')}</span><select class="select" data-adm-rstatus="${r.id}">${RIM_STATUSES.map(s => opt(s, L.rimStatus[s], r.status)).join('')}</select></label>
+      <div class="adm-acts">${rimLive(r) ? `<a class="btn btn-line btn-sm" href="#/rim/${r.id}" aria-label="${esc(r.title)}">${ico('eye', 'sm')}</a>` : ''}<button class="btn btn-dark btn-sm" data-adm="rim-edit" data-id="${r.id}">${ico('edit', 'sm')}${t('adm.edit')}</button><button class="btn btn-ghost btn-sm" data-adm="rim-delete" data-id="${r.id}" aria-label="${esc(t('adm.delete'))}">${ico('trash', 'sm')}</button></div>
+    </div>`).join('')}</div>` : `<div class="empty" style="padding:36px 20px"><div class="e-ic">${ico('rim')}</div><p>${t('adm.rimsNone')}</p></div>`}`;
+}
+function openRimEditor(id) {
+  const r = id ? rimById(id) : null;
+  const d = r ? rimRaw(r) : { id: Math.max(0, ...RIMS.map(x => x.id)) + 1, currency: 'CHF', size: 18, qty: 4, material: 'alloy', condition: 'used', status: 'active', location: [BUSINESS.zip, BUSINESS.city].filter(Boolean).join(' '), listed: todayISO() };
+  admPhotos = r ? [...r.photos] : [];
+  const fld = (k, label, html, req, full, help) => `<div class="field ${full ? 'full' : ''}" data-req="${req ? 1 : ''}"><label for="adm_${k}">${esc(label)}</label>${html}<span class="msg">${ico('info', 'sm')}<span></span></span>${help ? `<p class="hint" style="margin-top:6px">${esc(help)}</p>` : ''}</div>`;
+  const inp = (k, attrs = '') => `<input class="input" id="adm_${k}" data-a="${k}" value="${esc(d[k] ?? '')}" ${attrs}>`;
+  const sel = (k, list) => `<select class="select" id="adm_${k}" data-a="${k}">${list.map(([a, b]) => opt(a, b, d[k] ?? '')).join('')}</select>`;
+  const fitsTxt = (d.fits || []).map(f => [f.make, f.model || '', f.years || ''].join(' | ').replace(/( \| )+$/, '')).join('\n');
+  const brands = [...new Set(['BBS', 'OZ Racing', 'Borbet', 'Rial', 'Dezent', 'ATS', 'Ronal', 'AEZ', 'Vossen', 'Rotiform', 'BMW', 'Mercedes-Benz', 'Audi', 'Porsche', 'Volkswagen', ...RIMS.map(x => x.brand)])].sort((a, b) => a.localeCompare(b));
+  openModal(`${mHead(esc(t(r ? 'adm.edit' : 'adm.rimNew')) + (r ? ' – ' + esc(r.title) : ''))}<form class="modal-b" id="admForm" novalidate>
+    <div class="fgrid">
+      ${fld('title', t('adm.rimTitle'), inp('title', 'maxlength="120"'), true, true)}
+      ${fld('brand', t('rf.brand'), inp('brand', 'list="admBrands" maxlength="60"') + `<datalist id="admBrands">${brands.map(b => `<option value="${esc(b)}">`).join('')}</datalist>`, true)}
+      ${fld('status', t('adm.status'), sel('status', RIM_STATUSES.map(s => [s, L.rimStatus[s]])), true)}
+      ${fld('price', t('rf.price'), inp('price', 'inputmode="numeric" maxlength="9"'), true)}
+      ${fld('currency', t('rf.currency'), sel('currency', [['CHF', 'CHF'], ['EUR', 'EUR']]), true)}
+      ${fld('size', t('rf.size'), sel('size', RIM_SIZES.map(s => [s, `${s}″`])), true)}
+      ${fld('width', t('rf.width'), inp('width', 'inputmode="decimal" maxlength="5" placeholder="8.5"'), true)}
+      ${fld('pcd', t('rf.pcd'), inp('pcd', 'maxlength="10" placeholder="5x112"'), true)}
+      ${fld('et', t('rf.et'), inp('et', 'inputmode="numeric" maxlength="4" placeholder="45"'), true)}
+      ${fld('cb', `${t('rf.cb')} (mm)`, inp('cb', 'inputmode="decimal" maxlength="6" placeholder="66.6"'))}
+      ${fld('qty', t('rf.qty'), sel('qty', RIM_QTY.map(n => [n, n === 1 ? t('rim.qty1') : t('rim.qtyN', { n })])), true)}
+      ${fld('material', t('rf.material'), sel('material', RIM_MATERIALS.map(m => [m, L.rimMat[m]])), true)}
+      ${fld('condition', t('rf.cond'), sel('condition', RIM_CONDITIONS.map(c => [c, L.rimCond[c]])), true)}
+      ${fld('location', t('rf.location'), inp('location', 'maxlength="80"'), false, true)}
+      ${fld('fits', t('rf.fits'), `<textarea class="textarea" id="adm_fits" data-a="fits" rows="3" maxlength="2000">${esc(fitsTxt)}</textarea>`, false, true, t('adm.fitsHelp'))}
+      ${fld('desc', t('det.desc'), `<textarea class="textarea" id="adm_desc" data-a="desc" rows="3" maxlength="2000">${esc(loc(d.desc || ''))}</textarea>`, false, true)}
+      <div class="full"><span class="flabel" style="display:block;margin-bottom:8px">${t('adm.photos')}</span><div class="ph-grid" id="admPh" style="margin-top:0"></div>
+        <div class="adm-ph-add"><input class="input" id="admPhUrl" placeholder="https://…"><button type="button" class="btn btn-line btn-sm" data-adm="ph-url">${ico('plus', 'sm')}URL</button><label class="btn btn-line btn-sm">${ico('upload', 'sm')}${t('adm.upload')}<input type="file" accept="image/*" multiple id="admPhFile" hidden></label></div>
+        <p class="field-note" id="admPhErr" hidden>${ico('info', 'sm')}<span>${t('adm.photoReq')}</span></p></div>
+    </div>
+    <div class="wz-foot" style="margin-top:8px"><button type="button" class="btn btn-line" data-close>${t('adm.cancel')}</button><button class="btn btn-primary" type="submit">${ico('check', 'sm')}${t('adm.save')}</button></div>
+  </form>`, true);
+  paintAdmPhotos();
+  const form = $('#admForm');
+  $('#admPhFile').onchange = async e => {
+    for (const f of [...e.target.files]) { try { admPhotos.push(await shrinkImage(f)); } catch (err) { /* not an image */ } }
+    e.target.value = ''; paintAdmPhotos(); if (admPhotos.length) $('#admPhErr').hidden = true;
+  };
+  form.onsubmit = e => {
+    e.preventDefault();
+    let ok = validate(form);
+    const g = k => (($(`[data-a="${k}"]`, form) || {}).value || '').trim();
+    const dec = k => g(k).replace(',', '.');
+    const bad = (k, msg) => {
+      const el = $(`[data-a="${k}"]`, form), f = el.closest('.field'), m = f.querySelector('.msg');
+      f.classList.add('err'); m.id = m.id || `adm_${k}_msg`; m.querySelector('span').textContent = msg;
+      el.setAttribute('aria-invalid', 'true'); el.setAttribute('aria-describedby', m.id);
+      if (ok) el.focus(); ok = false;
+    };
+    if (g('price') && !(+digits(g('price')) > 0)) bad('price', t('adm.numErr'));
+    if (g('width') && !/^\d{1,2}(\.\d{1,2})?$/.test(dec('width'))) bad('width', t('adm.numErr'));
+    if (g('pcd') && !/^[3-8]x\d{2,3}(\.\d)?$/i.test(g('pcd').replace(/\s+/g, ''))) bad('pcd', t('adm.pcdErr'));
+    if (g('et') && !/^-?\d{1,3}$/.test(g('et'))) bad('et', t('adm.numErr'));
+    if (g('cb') && !/^\d{2,3}(\.\d{1,2})?$/.test(dec('cb'))) bad('cb', t('adm.numErr'));
+    if (!admPhotos.length) { $('#admPhErr').hidden = false; ok = false; }
+    if (!ok) return;
+    const fits = g('fits').split('\n').map(l => l.split('|').map(s => s.trim().slice(0, 60))).filter(p => p[0]).slice(0, 30)
+      .map(([make, model = '', years = '']) => ({ make, ...(model ? { model } : {}), ...(years ? { years } : {}) }));
+    const nr = prepRim({ ...d, title: g('title'), brand: g('brand'), status: g('status'), price: +digits(g('price')), currency: g('currency'), size: +g('size'), width: +dec('width'), pcd: g('pcd').replace(/\s+/g, ''), et: +g('et'), cb: g('cb') ? +dec('cb') : '', qty: +g('qty'), material: g('material'), condition: g('condition'), location: g('location'), fits, desc: g('desc'), photos: [...admPhotos], listed: d.listed || todayISO() });
+    const i = RIMS.findIndex(x => x.id === nr.id);
+    if (i >= 0) RIMS[i] = nr; else RIMS.unshift(nr);
+    afterRimChange(); closeModal(); renderAdmin(); toast(t('adm.saved'));
+  };
 }
 
 /* ---------- Modals ---------- */
@@ -693,15 +1028,20 @@ function leadCfg(type) {
     { k: 'zip', label: t('lead.zip'), type: 'zip', req: true, ph: eg('8000'), ac: 'postal-code' },
     { k: 'city', label: t('lead.city'), type: 'text', req: true, ac: 'address-level2' },
     F_NAME(), F_PHONE(), F_EMAIL(), F_MSG()] };
+  if (type === 'rim') return { ...base, icon: 'rim', fields: [{ k: 'rim', label: t('lead.rimSel'), type: 'rimsel', req: true, full: true },
+    { k: 'car', label: t('lead.rimCar'), type: 'text', req: false, full: true, ph: eg('BMW 3er G20, 2021'), ac: 'off' },
+    F_NAME(), F_EMAIL(), F_PHONE(), F_MSG()] };
   if (type === 'inquiry') return { ...base, icon: 'msg', fields: [{ ...F_VEH(), req: false },
     extW, F_NAME(), F_EMAIL(), F_PHONE(), { ...F_MSG(), req: true }] };
   return null;
 }const vehLabel = v => `${v.title} ${v.variant} – ${chf(v.price)}`;
+const miniRim = r => `<div class="mini-car"><img src="${esc(IMG(r.img, 200, 140))}" alt="" data-fb><div><b>${esc(r.title)}</b><span class="num">${money(r.price, r.currency)} · ${rimDim(r)} · ${esc(r.pcd)}</span></div></div>`;
 const miniCar = v => `<div class="mini-car"><img src="${esc(IMG(v.img, 200, 140))}" alt="" data-fb><div><b>${esc(v.title)} ${esc(v.variant)}</b><span class="num">${chf(v.price)} · ${km(v.km)} · ${reg(v)}</span></div></div>`;
 function lfHtml(f, p, val = '') {
   const id = `${p}_${f.k}`; let inner;
   if (f.type === 'check') return `<label class="check full ext-check"><input type="checkbox" id="${id}" data-k="${f.k}" value="1" ${val ? 'checked' : ''}><span>${esc(f.label)}${f.hint ? `<small>${esc(f.hint)}</small>` : ''}</span></label>`;
-  if (f.type === 'vehicle') inner = `<select class="select" id="${id}" data-k="${f.k}">${opt('', t('lead.chooseVehicle'), val)}${VEHICLES.map(v => opt(v.id, vehLabel(v), val)).join('')}${opt('other', t('lead.otherVehicle'), val)}</select>`;
+  if (f.type === 'rimsel') inner = `<select class="select" id="${id}" data-k="${f.k}">${opt('', t('lead.chooseRim'), val)}${RIMS.filter(rimOnSale).map(r => opt(r.id, `${r.title} – ${money(r.price, r.currency)}`, val)).join('')}${opt('other', t('lead.otherRim'), val)}</select>`;
+  else if (f.type === 'vehicle') inner = `<select class="select" id="${id}" data-k="${f.k}">${opt('', t('lead.chooseVehicle'), val)}${VEHICLES.map(v => opt(v.id, vehLabel(v), val)).join('')}${opt('other', t('lead.otherVehicle'), val)}</select>`;
   else if (f.type === 'select') inner = `<select class="select" id="${id}" data-k="${f.k}">${f.def ? '' : opt('', f.any || t('lead.select'), val)}${f.opts.map(([v, l]) => opt(v, l, val || f.def || '')).join('')}</select>`;
   else if (f.type === 'textarea') inner = `<textarea class="textarea" id="${id}" data-k="${f.k}" maxlength="2000" placeholder="${esc(f.ph || '')}">${esc(val)}</textarea>`;
   else {
@@ -713,13 +1053,15 @@ function lfHtml(f, p, val = '') {
 }
 const consentHtml = () => `<label class="consent"><input type="checkbox" data-reqcheck><span>${t('lead.consent')}</span></label>`;
 function leadFormHtml(type, carId = '', preset = {}) {
-  const cfg = leadCfg(type), v = byId(carId);
+  const cfg = leadCfg(type), isRim = type === 'rim', v = isRim ? null : byId(carId), rr = isRim ? rimById(carId) : null;
+  /* a rim that is sold or hidden can't be requested any more → general rim request */
+  const rimVal = rr && rimOnSale(rr) ? rr.id : rr ? 'other' : '';
   const flow = type === 'testdrive' ? `<ol class="flow">${t('td.flow').split('|').map(s => `<li>${esc(s)}</li>`).join('')}</ol>` : '';
   return `<form class="lead-form" data-leadform="${type}" novalidate>
     <div class="notice">${ico(cfg.icon)}<span>${cfg.notice}</span></div>
     ${flow}
-    <div data-mini>${v ? miniCar(v) : ''}</div>
-    <div class="fgrid">${cfg.fields.map(f => lfHtml(f, 'lf_' + type, f.k === 'vehicle' && v ? v.id : (preset[f.k] || ''))).join('')}</div>
+    <div data-mini>${v ? miniCar(v) : rr && rimOnSale(rr) ? miniRim(rr) : ''}</div>
+    <div class="fgrid">${cfg.fields.map(f => lfHtml(f, 'lf_' + type, f.k === 'vehicle' && v ? v.id : f.k === 'rim' && rimVal ? rimVal : (preset[f.k] || ''))).join('')}</div>
     ${consentHtml()}
     <button class="btn btn-primary btn-lg btn-block" type="submit">${ico('arrow')}${cfg.submit}</button>
   </form>`;
@@ -731,6 +1073,7 @@ function collectRows(scope, fields) {
     if (f.type === 'check') return { k: f.k, label: f.sumLabel || f.label, val: el.checked ? t('sum.yes') : '', raw: el.checked ? 'yes' : '' };
     const raw = (el.value || '').trim(); let val = raw;
     if (f.type === 'vehicle') { const v = byId(raw); val = v ? `${v.title} ${v.variant} (${chf(v.price)}) – ${vehicleUrl(v)}` : raw === 'other' ? t('lead.otherVehicle') : ''; }
+    else if (f.type === 'rimsel') { const r = rimById(raw); val = r ? `${r.title} (${money(r.price, r.currency)}) – ${rimUrl(r)}` : raw === 'other' ? t('lead.otherRim') : ''; }
     else if (f.type === 'select' && raw) { const o = f.opts.find(x => String(x[0]) === raw); val = o ? String(o[1]) : raw; }
     if (f.type === 'date' && /^\d{4}-\d{2}-\d{2}$/.test(raw)) { const [y, m, d] = raw.split('-'); val = `${d}.${m}.${y}`; }
     return { k: f.k, label: f.sumLabel || f.label, val, raw };
@@ -746,6 +1089,7 @@ function bindLeadForm(form, type, onDone) {
   form.addEventListener('change', e => {
     const el = e.target;
     if (el.dataset.k === 'vehicle') { const v = byId(el.value); $('[data-mini]', form).innerHTML = v ? miniCar(v) : ''; }
+    if (el.dataset.k === 'rim') { const r = rimById(el.value); $('[data-mini]', form).innerHTML = r ? miniRim(r) : ''; }
     if (el.matches('[data-reqcheck]') && el.checked) el.closest('label').style.color = '';
     const f = el.closest('.field'); if (f && f.classList.contains('err') && el.value) f.classList.remove('err');
   });
@@ -795,21 +1139,23 @@ async function sendLead(type, title, rows, files) {
   const netlify = !BUSINESS.leadEndpoint && BUSINESS.netlifyForms && /^https?:$/.test(location.protocol);
   if (!BUSINESS.leadEndpoint && !netlify) return { demo: true };
   const vr = rows.find(r => (r.k === 'vehicle' || r.k === 'interest') && r.raw), v = vr && byId(vr.raw);
-  const vehicle = v ? `${v.title} ${v.variant} (${chf(v.price)})` : (vr ? vr.val : '');
-  const subject = `${title}${v ? ' – ' + v.title + ' ' + v.variant : ''} – NEXT CARS SA`;
+  const rr = rows.find(r => r.k === 'rim' && r.raw), rim = rr && rimById(rr.raw);
+  const vehicle = v ? `${v.title} ${v.variant} (${chf(v.price)})` : rim ? `${rim.title} (${money(rim.price, rim.currency)})` : (vr ? vr.val : rr ? rr.val : '');
+  const itemUrl = v ? vehicleUrl(v) : rim ? rimUrl(rim) : '';
+  const subject = `${title}${v ? ' – ' + v.title + ' ' + v.variant : rim ? ' – ' + rim.title : ''} – NEXT CARS SA`;
   const get = k => (rows.find(r => r.k === k) || {}).raw || '';
   try {
     const fd = new FormData();
     if (netlify) {
       fd.append('form-name', NETLIFY_FORM); fd.append('bot-field', '');
       fd.append('subject', subject); fd.append('request_type', type); fd.append('language', lang);
-      fd.append('vehicle', vehicle); fd.append('vehicle_url', v ? vehicleUrl(v) : '');
+      fd.append('vehicle', vehicle); fd.append('vehicle_url', itemUrl);
       fd.append('name', get('name')); fd.append('email', get('email')); fd.append('phone', get('phone'));
       fd.append('summary', leadSummary(title, rows, files.length));
       files.slice(0, 12).forEach((f, i) => fd.append('photo' + (i + 1), f, f.name));
     } else {
       fd.append('request_type', type); fd.append('language', lang); fd.append('_subject', subject);
-      fd.append('vehicle', vehicle); fd.append('vehicle_url', v ? vehicleUrl(v) : '');
+      fd.append('vehicle', vehicle); fd.append('vehicle_url', itemUrl);
       // form rows; the selected car's id is sent as vehicle_id so it does not overwrite the readable "vehicle" field
       rows.forEach(r => { const k = r.k === 'vehicle' ? 'vehicle_id' : r.k; fd.append(k, r.raw); if (r.val !== r.raw) fd.append(k + '_label', r.val); });
       fd.append('summary', leadSummary(title, rows, files.length));
@@ -1001,10 +1347,11 @@ function scrollWizard() { const w = $('.wizard'); if (!w) return; const top = w.
 
 /* ---------- Favourites ---------- */
 function renderFavs() {
-  const list = [...state.favs].map(byId).filter(Boolean);
-  $('#favSub').textContent = list.length ? `${nVeh(list.length)} ${t(list.length === 1 ? 'favs.saved1' : 'favs.savedN')}` : t('favs.empty');
-  $('#favClear').hidden = !list.length;
-  $('#favGrid').innerHTML = list.length ? list.map(card).join('') : `<div class="empty"><div class="e-ic" style="color:var(--gold-ink);background:var(--gold-50)">${ico('heart')}</div><h2>${t('favs.noneT')}</h2><p>${t('favs.noneP')}</p><div class="row"><a href="#/search" class="btn btn-dark">${t('nav.cars')}</a></div></div>`;
+  const cars = [...state.favs].map(byId).filter(Boolean), rims = [...state.rimFavs].map(rimById).filter(r => r && rimLive(r)), n = cars.length + rims.length;
+  $('#favSub').textContent = n ? `${[cars.length ? nVeh(cars.length) : '', rims.length ? nRim(rims.length) : ''].filter(Boolean).join(' · ')} ${t(n === 1 ? 'favs.saved1' : 'favs.savedN')}` : t('favs.empty');
+  $('#favClear').hidden = !n;
+  const both = cars.length && rims.length;
+  $('#favGrid').innerHTML = n ? (both ? `<h2 class="grid-h">${t('nav.cars')}</h2>` : '') + cars.map(card).join('') + (both ? `<h2 class="grid-h">${t('nav.rims')}</h2>` : '') + rims.map(rimCard).join('') : `<div class="empty"><div class="e-ic" style="color:var(--gold-ink);background:var(--gold-50)">${ico('heart')}</div><h2>${t('favs.noneT')}</h2><p>${t('favs.noneP')}</p><div class="row"><a href="#/search" class="btn btn-dark">${t('nav.cars')}</a><a href="#/rims" class="btn btn-line">${t('nav.rims')}</a></div></div>`;
 }
 
 /* ---------- Info (legal) modal ---------- */
@@ -1065,7 +1412,7 @@ const DRAFT_KEY = 'nextcars-admin-draft';
 const RAW_KEYS = ['id', 'make', 'model', 'variant', 'price', 'year', 'month', 'km', 'ps', 'fuel', 'trans', 'gearbox', 'drive', 'body', 'engine', 'ccm', 'ext', 'color', 'int', 'doors', 'seats', 'badges', 'listed', 'inspection', 'warranty', 'img', 'more', 'crops', 'photos', 'cons', 'range', 'extra', 'feats', 'desc', 'hl'];
 const rawOf = v => { const o = {}; RAW_KEYS.forEach(k => { const x = v[k]; if (x === undefined || x === '' || (Array.isArray(x) && !x.length && k !== 'badges')) return; o[k] = x; }); return o; };
 function saveDraft() {
-  try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ vehicles: VEHICLES.map(rawOf) })); return true; }
+  try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ vehicles: VEHICLES.map(rawOf), rims: RIMS.map(rimRaw) })); return true; }
   catch (e) { toast(t('adm.quota'), 'info'); return false; }
 }
 function afterVehicleChange() {
@@ -1074,9 +1421,12 @@ function afterVehicleChange() {
 }
 function paintAdminBar() { $('#admBar').hidden = !ADMIN_DRAFT || currentView === 'admin'; }
 const saveFile = (text, name, type) => { const url = URL.createObjectURL(new Blob([text], { type })); const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000); };
+let admTab = 'cars';
 function renderAdmin() {
+  const tabs = `<div class="seg adm-tabs" role="group" aria-label="${esc(t('nav.cat'))}"><button type="button" data-adm="tab" data-tab="cars" class="${admTab === 'cars' ? 'on' : ''}" aria-pressed="${admTab === 'cars'}">${ico('car', 'sm')}${t('nav.cars')} (${VEHICLES.length})</button><button type="button" data-adm="tab" data-tab="rims" class="${admTab === 'rims' ? 'on' : ''}" aria-pressed="${admTab === 'rims'}">${ico('rim', 'sm')}${t('nav.rims')} (${RIMS.length})</button></div>`;
+  if (admTab === 'rims') { renderAdminRims(tabs); return; }
   const statusOpts = v => INSPECTION.map(s => opt(s, t('insp.' + s), v.inspection || 'tbd')).join('');
-  $('#admRoot').innerHTML = `<div class="adm-tools">
+  $('#admRoot').innerHTML = `${tabs}<div class="adm-tools">
       <button class="btn btn-primary" data-adm="new">${ico('plus')}${t('adm.new')}</button>
       <button class="btn btn-dark" data-adm="download">${ico('download')}${t('adm.download')}</button>
       <button class="btn btn-line" data-adm="export">${ico('file')}${t('adm.exportJson')}</button>
@@ -1171,21 +1521,30 @@ const shrinkImage = file => new Promise((res, rej) => {
   img.onerror = () => { URL.revokeObjectURL(url); rej(); };
   img.src = url;
 });
-async function downloadSite() {
-  // Rebuilds assets/js/vehicles.js with the current list; replace that file on the website to publish
+async function downloadSite(kind = 'cars') {
+  // Rebuilds assets/js/vehicles.js (or rims.js) with the current list; replace that file on the website to publish
+  const rims = kind === 'rims', file = rims ? 'rims.js' : 'vehicles.js', mark = rims ? 'RIMS' : 'VEHICLES';
+  const list = rims ? RIMS.map(rimRaw) : VEHICLES.map(rawOf);
   let src;
-  try { const r = await fetch('assets/js/vehicles.js', { cache: 'no-store' }); if (!r.ok) throw 0; src = await r.text(); } catch (e) { toast(t('adm.dlFail'), 'info'); return; }
-  const a = src.indexOf('/*VEHICLES-START*/'), b = src.indexOf('/*VEHICLES-END*/');
+  try { const r = await fetch('assets/js/' + file, { cache: 'no-store' }); if (!r.ok) throw 0; src = await r.text(); } catch (e) { toast(t('adm.dlFail'), 'info'); return; }
+  const a = src.indexOf(`/*${mark}-START*/`), b = src.indexOf(`/*${mark}-END*/`);
   if (a < 0 || b < 0) { toast(t('adm.dlFail'), 'info'); return; }
-  const out = src.slice(0, a) + '/*VEHICLES-START*/\nconst VEHICLES = [\n  ' + VEHICLES.map(v => JSON.stringify(rawOf(v))).join(',\n  ') + '\n];\n' + src.slice(b);
-  saveFile(out, 'vehicles.js', 'text/javascript');
-  toast(t('adm.dlDone'));
+  const out = src.slice(0, a) + `/*${mark}-START*/\nconst ${mark} = [\n  ` + list.map(x => JSON.stringify(x)).join(',\n  ') + '\n];\n' + src.slice(b);
+  saveFile(out, file, 'text/javascript');
+  toast(t(rims ? 'adm.dlDoneRims' : 'adm.dlDone'));
 }
 function initAdmin() {
   const root = $('#admRoot');
   root.addEventListener('change', e => {
     const s = e.target.closest('[data-adm-status]');
     if (s) { const v = byId(s.dataset.admStatus); if (v) { v.inspection = s.value; afterVehicleChange(); renderAdmin(); toast(t('adm.saved')); } return; }
+    const rs = e.target.closest('[data-adm-rstatus]');
+    if (rs) { const r = rimById(rs.dataset.admRstatus); if (r) { r.status = rs.value; afterRimChange(); renderAdmin(); toast(t('adm.saved')); } return; }
+    if (e.target.matches('[data-adm-rimport]')) {
+      const f = e.target.files[0]; if (!f) return;
+      f.text().then(txt => { const data = JSON.parse(txt), list = Array.isArray(data) ? data : data.rims; if (!Array.isArray(list)) throw 0; RIMS.splice(0, RIMS.length, ...list.map(prepRim)); afterRimChange(); renderAdmin(); toast(t('adm.imported')); }).catch(() => toast(t('adm.importFail'), 'info'));
+      return;
+    }
     if (e.target.matches('[data-adm-import]')) {
       const f = e.target.files[0]; if (!f) return;
       f.text().then(txt => { const data = JSON.parse(txt), list = Array.isArray(data) ? data : data.vehicles; if (!Array.isArray(list)) throw 0; VEHICLES.splice(0, VEHICLES.length, ...list.map(prepVehicle)); afterVehicleChange(); renderAdmin(); toast(t('adm.imported')); }).catch(() => toast(t('adm.importFail'), 'info'));
@@ -1194,6 +1553,12 @@ function initAdmin() {
   root.addEventListener('click', e => {
     const b = e.target.closest('[data-adm]'); if (!b) return;
     const act = b.dataset.adm, id = +b.dataset.id;
+    if (act === 'tab') { admTab = b.dataset.tab === 'rims' ? 'rims' : 'cars'; renderAdmin(); return; }
+    if (act === 'rim-new') openRimEditor(0);
+    if (act === 'rim-edit') openRimEditor(id);
+    if (act === 'rim-delete') askConfirm(t('adm.confirmDeleteRim'), ico('trash', 'sm') + t('adm.delete'), () => { const i = RIMS.findIndex(x => x.id === id); if (i >= 0) RIMS.splice(i, 1); state.rimFavs.delete(id); updateFavCount(); afterRimChange(); renderAdmin(); });
+    if (act === 'rim-download') downloadSite('rims');
+    if (act === 'rim-export') saveFile(JSON.stringify({ rims: RIMS.map(rimRaw) }, null, 2), 'nextcars-felgen.json', 'application/json');
     if (act === 'new') openVehicleEditor(0);
     if (act === 'edit') openVehicleEditor(id);
     if (act === 'delete') askConfirm(t('adm.confirmDelete'), ico('trash', 'sm') + t('adm.delete'), () => { const i = VEHICLES.findIndex(x => x.id === id); if (i >= 0) VEHICLES.splice(i, 1); state.favs.delete(id); updateFavCount(); afterVehicleChange(); renderAdmin(); });
@@ -1280,19 +1645,22 @@ function route(keepScroll = false) {
   const parts = path.split('/').filter(Boolean);
   let view = parts[0] || 'home';
   if (ALIASES[view]) view = ALIASES[view];
-  if (!['home', 'search', 'car', 'nderrim', 'blejme', 'financim', 'kontakt', 'favourites', 'admin'].includes(view)) view = 'home';
+  if (!['home', 'search', 'car', 'rims', 'rim', 'nderrim', 'blejme', 'financim', 'kontakt', 'favourites', 'admin'].includes(view)) view = 'home';
   // #/admin only opens right after the password (or on a re-render / "Discard preview" reload) — never from the address bar
   const blocked = view === 'admin' && !(adminPass || (keepScroll && currentView === 'admin') || takeAdminResume());
   if (view === 'admin') adminPass = false;
   if (blocked) { history.replaceState(null, '', '#/'); view = 'home'; }
-  const panel = ['nderrim', 'blejme'].includes(view) ? 'sell' : view;
+  const panel = ['nderrim', 'blejme'].includes(view) ? 'sell' : view === 'rim' ? 'car' : view;
   $$('.view').forEach(v => v.classList.toggle('on', v.dataset.view === panel));
-  $$('.nav a').forEach(a => a.classList.toggle('active', a.dataset.nav === view || (view === 'car' && a.dataset.nav === 'search')));
+  $$('.nav a').forEach(a => a.classList.toggle('active', a.dataset.nav === view || (view === 'car' && a.dataset.nav === 'search') || (view === 'rim' && a.dataset.nav === 'rims')));
   openFilters(false); closeDrawer(); closeModal(); closeLB();
-  document.body.classList.toggle('has-mbar', view === 'car');
-  $('#mbar').classList.toggle('on', view === 'car');
+  const detail = view === 'car' || view === 'rim';
+  document.body.classList.toggle('has-mbar', detail);
+  $('#mbar').classList.toggle('on', detail);
   if (view === 'search') { if (query && !keepScroll) F = parseQuery(query); refreshSearch(!keepScroll); }
   if (view === 'car') renderCar(parts[1]);
+  if (view === 'rims') { if (query && !keepScroll) RF = parseRimQuery(query); $('#rQ').value = RF.q; $('#rSort').value = rSortKey; refreshRims(!keepScroll); }
+  if (view === 'rim') renderRim(parts[1]);
   if (view === 'nderrim' || view === 'blejme') {
     wzMode = view === 'nderrim' ? 'trade' : 'buy';
     const car = new URLSearchParams(query || '').get('car');
@@ -1303,9 +1671,9 @@ function route(keepScroll = false) {
   if (view === 'kontakt') { $('#contactPage').innerHTML = contactHtml(); $('#reviewsPage').innerHTML = reviewsHtml(); $('#reviewsPageWrap').hidden = !REVIEWS.length; }
   if (view === 'admin') renderAdmin();
   if (view === 'favourites') renderFavs();
-  const v = view === 'car' && byId(parts[1]);
-  const titleKey = { search: 'nav.cars', nderrim: 'nav.tradeLong', blejme: 'nav.buyLong', financim: 'nav.fin', kontakt: 'nav.contact', favourites: 'nav.favs', admin: 'adm.title' }[view];
-  document.title = v ? `${v.title} ${v.variant} – ${chf(v.price)} – NEXT CARS SA` : titleKey ? `${t(titleKey)} – NEXT CARS SA` : t('title.home');
+  const v = view === 'car' && byId(parts[1]), rv = view === 'rim' && rimById(parts[1]);
+  const titleKey = { search: 'nav.cars', rims: 'nav.rims', nderrim: 'nav.tradeLong', blejme: 'nav.buyLong', financim: 'nav.fin', kontakt: 'nav.contact', favourites: 'nav.favs', admin: 'adm.title' }[view];
+  document.title = v ? `${v.title} ${v.variant} – ${chf(v.price)} – NEXT CARS SA` : rv && rimLive(rv) ? `${rv.title} – ${money(rv.price, rv.currency)} – NEXT CARS SA` : titleKey ? `${t(titleKey)} – NEXT CARS SA` : t('title.home');
   if (keepScroll) return;
   prevRoute = currentView ? h : ''; currentView = view;
   paintAdminBar();
@@ -1318,7 +1686,7 @@ function route(keepScroll = false) {
 function openDrawer() { $('#drawer').classList.add('open'); $('#scrim').classList.add('open'); document.body.style.overflow = 'hidden'; $('#burger').setAttribute('aria-expanded', 'true'); focusSoon($('#drawerClose')); }
 function closeDrawer() {
   const wasOpen = $('#drawer').classList.contains('open');
-  $('#drawer').classList.remove('open'); if (!$('#filters').classList.contains('open')) $('#scrim').classList.remove('open'); document.body.style.overflow = '';
+  $('#drawer').classList.remove('open'); if (!anyFiltersOpen()) $('#scrim').classList.remove('open'); document.body.style.overflow = '';
   $('#burger').setAttribute('aria-expanded', 'false');
   if (wasOpen && $('#drawer').contains(document.activeElement)) $('#burger').focus({ preventScroll: true });
 }
@@ -1341,13 +1709,16 @@ document.addEventListener('click', e => {
   if (el.closest('[data-wa]')) return; // let WhatsApp links open normally (and not the card)
   const lg = el.closest('[data-lang]'); if (lg) { e.preventDefault(); setLang(lg.dataset.lang); return; }
   const fav = el.closest('[data-fav]'); if (fav) { e.preventDefault(); e.stopPropagation(); toggleFav(fav.dataset.fav); return; }
-  const lead = el.closest('[data-lead]'); if (lead) { e.preventDefault(); openLead(lead.dataset.lead, lead.dataset.car || '', lead.dataset.extw ? { extWarranty: '1' } : {}); return; }
+  const rfav = el.closest('[data-rfav]'); if (rfav) { e.preventDefault(); e.stopPropagation(); toggleFav(rfav.dataset.rfav, 'rim'); return; }
+  const lead = el.closest('[data-lead]'); if (lead) { e.preventDefault(); openLead(lead.dataset.lead, lead.dataset.car || lead.dataset.rim || '', lead.dataset.extw ? { extWarranty: '1' } : {}); return; }
   if (el.closest('[data-fin-again]')) { paintFin(); return; }
   const cardEl = el.closest('.card[data-car]'); if (cardEl) { go('#/car/' + cardEl.dataset.car); return; }
+  const rimEl = el.closest('.card[data-rim]'); if (rimEl) { go('#/rim/' + rimEl.dataset.rim); return; }
   const br = el.closest('[data-brand]'); if (br) { e.preventDefault(); F = DEF(); F.make = [br.dataset.brand]; go('#/search'); return; }
   const bt = el.closest('[data-bodyt]'); if (bt) { F = DEF(); F.body = [bt.dataset.bodyt]; go('#/search'); return; }
   const inf = el.closest('[data-info]'); if (inf) { e.preventDefault(); openInfo(inf.dataset.info); return; }
   if (el.closest('[data-close]')) { closeModal(); return; }
+  if (el.closest('[data-rclear]')) { RF = RDEF(); $('#rQ').value = ''; refreshRims(); toast(t('toast.cleared'), 'x'); return; }
   if (el.closest('[data-clear]')) { F = DEF(); refreshSearch(); toast(t('toast.cleared'), 'x'); return; }
   const ft = el.closest('#finTabs [data-tab]'); if (ft) { finTab = ft.dataset.tab; paintFin(); return; }
   const rn = el.closest('.rail-nav button'); if (rn) { const rail = document.getElementById(rn.parentNode.dataset.rail); const dir = rn === rn.parentNode.lastElementChild ? 1 : -1; rail.scrollBy({ left: dir * rail.clientWidth * 0.9, behavior: 'smooth' }); return; }
@@ -1364,7 +1735,7 @@ document.addEventListener('click', e => {
 document.addEventListener('keydown', e => {
   if (e.key === 'Tab') trapTab(e);
   if (e.key === 'Escape') { closeModal(); closeDrawer(); closeLB(); openFilters(false); $('#langMenu').classList.remove('open'); }
-  if (currentView === 'car' && !$('#modalWrap').classList.contains('open') && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { if (e.key === 'ArrowRight') setG(G.i + 1); if (e.key === 'ArrowLeft') setG(G.i - 1); }
+  if ((currentView === 'car' || currentView === 'rim') && !$('#modalWrap').classList.contains('open') && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { if (e.key === 'ArrowRight') setG(G.i + 1); if (e.key === 'ArrowLeft') setG(G.i - 1); }
 });
 $('#langBtn').addEventListener('click', e => { e.stopPropagation(); const m = $('#langMenu'); m.classList.toggle('open'); $('#langBtn').setAttribute('aria-expanded', m.classList.contains('open')); });
 $('#burger').addEventListener('click', openDrawer);
@@ -1374,11 +1745,11 @@ $('#lbClose').addEventListener('click', closeLB);
 $('#lbPrev').addEventListener('click', () => setG(G.i - 1));
 $('#lbNext').addEventListener('click', () => setG(G.i + 1));
 $('#lightbox').addEventListener('click', e => { if (e.target.classList.contains('lb-img')) closeLB(); });
-$('#favClear').addEventListener('click', () => { state.favs.clear(); updateFavCount(); renderFavs(); toast(t('favs.cleared'), 'x'); });
+$('#favClear').addEventListener('click', () => { state.favs.clear(); state.rimFavs.clear(); updateFavCount(); renderFavs(); toast(t('favs.cleared'), 'x'); });
 addEventListener('scroll', () => $('#hdr').classList.toggle('scrolled', scrollY > 8), { passive: true });
 addEventListener('hashchange', () => route());
 
 /* ---------- Boot ---------- */
 $$('img[data-logo]').forEach(i => i.src = LOGO_SRC);
-applyStatic(); paintBusiness(); initHero(); renderHome(); initSearch(); initAdmin(); updateFavCount(); route();
+applyStatic(); paintBusiness(); initHero(); renderHome(); initSearch(); initRims(); initAdmin(); updateFavCount(); route();
 })();

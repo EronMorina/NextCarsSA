@@ -80,7 +80,7 @@ if ($fh) {
 }
 
 /* ---------- Fields ---------- */
-$types = ['testdrive', 'delivery', 'leasing', 'financing', 'inquiry', 'trade-in', 'we-buy'];
+$types = ['testdrive', 'delivery', 'leasing', 'financing', 'inquiry', 'trade-in', 'we-buy', 'rim'];
 $type = post('request_type');
 if (!in_array($type, $types, true)) respond(400, ['error' => 'type']);
 

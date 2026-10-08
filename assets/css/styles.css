@@ -843,6 +843,28 @@ a.tcard:hover{border-color:var(--gold);transform:translateY(-2px)}
 @media (max-width:480px){.lang-btn{padding:0 6px;gap:4px}.lang-btn .ico:last-child{display:none}}
 @media (max-width:360px){.lang-btn .ico:first-child{display:none}}
 
+/* Two buttons of equal width: side by side when they fit, otherwise stacked at full width */
+.btn-pair{display:flex;flex-wrap:wrap;gap:10px;max-width:520px}
+.btn-pair .btn{flex:1 1 250px}
+
+/* Rims / Felgen */
+.cat-tabs{display:inline-flex;gap:4px;background:var(--soft);border-radius:11px;padding:4px;margin:12px 0 10px}
+.cat-tabs a{height:36px;padding:0 16px;border-radius:8px;display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:13.5px;color:var(--muted);text-decoration:none;transition:background .15s,color .15s}
+.cat-tabs a:hover{color:var(--ink)}
+.cat-tabs a.on{background:#fff;color:var(--ink);box-shadow:var(--sh-1)}
+.rim-q{position:relative;margin-bottom:16px}
+.rim-q .ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted-2);pointer-events:none}
+.rim-q .input{height:48px;padding-left:42px;background:#fff}
+.results.solo{grid-template-columns:1fr}
+.badge.sold{background:var(--ink);color:#fff}
+.card.is-sold .media img{filter:grayscale(.55);opacity:.82}
+.specs .span2{grid-column:1/-1}
+.price-tag.tag-sold{background:var(--ink);color:#fff}
+.grid-h{grid-column:1/-1;font-size:18px;font-weight:800;margin:4px 0 -4px}
+.grid-h:not(:first-child){margin-top:18px}
+.adm-tabs{margin-bottom:18px}
+.adm-tabs button{display:inline-flex;align-items:center;gap:7px}
+
 /* Skip link (keyboard users) */
 .skip{position:fixed;left:12px;top:-80px;z-index:300;background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-weight:600;text-decoration:none;transition:top .15s}
 .skip:focus{top:12px}
