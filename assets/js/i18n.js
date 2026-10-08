@@ -497,7 +497,7 @@ const I18N = {
   'rims.found1': ['gefunden', 'trouvée', 'trovato', 'found'],
   'rims.foundN': ['gefunden', 'trouvées', 'trovati', 'found'],
   'ftr.madeBy': ['Website von', 'Site web par', 'Sito web di', 'Website by'],
-  'nav.rims': ['Felgen', 'Jantes', 'Cerchi', 'Rims'],
+  'nav.rims': ['Shop', 'Shop', 'Shop', 'Shop'],
   'nav.cat': ['Kategorie', 'Catégorie', 'Categoria', 'Category'],
   'rim.one': ['Angebot', 'annonce', 'annuncio', 'listing'],
   'rim.many': ['Angebote', 'annonces', 'annunci', 'listings'],
