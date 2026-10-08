@@ -1,0 +1,4 @@
+# Not deployed to Vercel (they are for the Infomaniak / Apache hosting)
+api/*.php
+.htaccess
+_headers

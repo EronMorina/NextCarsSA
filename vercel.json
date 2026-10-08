@@ -1,4 +1,14 @@
 {
+  "rewrites": [
+    {
+      "source": "/:page(fahrzeuge|fahrzeug|felgen|felge|eintausch|ankauf|finanzierung|kontakt|favoriten|admin)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/:page(fahrzeuge|fahrzeug|felgen|felge|eintausch|ankauf|finanzierung|kontakt|favoriten|admin)/:rest*",
+      "destination": "/index.html"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

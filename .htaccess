@@ -21,7 +21,11 @@ ErrorDocument 404 /404.html
 # Block hidden files and folders (.git, .htaccess, .env, …) — except /.well-known (certificates)
 <IfModule mod_rewrite.c>
   RewriteEngine On
-  RewriteRule "(^|/).(?!well-known/)" - [F]
+  RewriteRule "(^|/)\.(?!well-known/)" - [F]
+  # Request forms: /api/lead is answered by the PHP script
+  RewriteRule ^api/lead$ api/lead.php [L]
+  # Page addresses (/fahrzeuge, /fahrzeug/8, /felgen …) are all served by index.html
+  RewriteRule ^(fahrzeuge|fahrzeug|felgen|felge|eintausch|ankauf|finanzierung|kontakt|favoriten|admin)(/.*)?$ index.html [L]
   # Force HTTPS: enable these two lines once an SSL certificate is installed
   # RewriteCond %{HTTPS} !=on
   # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]

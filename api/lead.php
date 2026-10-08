@@ -96,7 +96,8 @@ $summary = text(post('summary'), 8000);
 if ($name === '' || $summary === '') respond(400, ['error' => 'missing']);
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) respond(400, ['error' => 'email']);
 if ($phone !== '' && !preg_match('/^[+0-9 ()\/.\-]{6,30}$/', $phone)) respond(400, ['error' => 'phone']);
-if ($vurl !== '' && strpos($vurl, 'https://' . $host . '/') !== 0 && strpos($vurl, 'http://' . $host . '/') !== 0) $vurl = '';
+// only links to this website
+if ($vurl !== '' && (strtolower((string)parse_url($vurl, PHP_URL_HOST)) !== $host || !in_array(parse_url($vurl, PHP_URL_SCHEME), ['http', 'https'], true))) $vurl = '';
 if ($subject === '') $subject = 'Anfrage – NEXT CARS SA';
 
 /* ---------- Photos (trade-in / we buy your car) ---------- */

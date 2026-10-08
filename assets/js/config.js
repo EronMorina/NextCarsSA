@@ -10,7 +10,7 @@
    ===================================================================== */
 
 /* Logo used on the website (web-optimised copy of assets/img/logo-nextcars.png) */
-const LOGO_SRC = 'assets/img/logo-nextcars-web.png';
+const LOGO_SRC = '/assets/img/logo-nextcars-web.png';
 
 /* ---------- 1. Business details ---------- */
 const BUSINESS = {
@@ -37,12 +37,13 @@ const BUSINESS = {
   instagram: '',
   facebook: '',
   /* Form submissions (hosting: Infomaniak):
-     • leadEndpoint: every request (incl. photos) is sent to api/lead.php on the same hosting, which e-mails it.
-       The recipient address is set in api/lead.php (server only, not visible in the website code).
+     • leadEndpoint: every request (incl. photos) is sent to /api/lead on the same hosting, which e-mails it:
+       on Vercel api/lead.js (settings: Vercel environment variables), on Infomaniak api/lead.php (settings: api/config.php).
+       The recipient address is never in the website code.
      • netlifyForms: only for Netlify hosting (not used on Infomaniak).
      • Opened locally (file://) nothing can be sent. */
   netlifyForms: false,
-  leadEndpoint: 'api/lead.php'
+  leadEndpoint: '/api/lead'
 };
 /* ---------- 2. Customer reviews — ONLY from the official NEXT CARS SA profile on AutoScout24 ----------
    Copy real reviews from AutoScout24 (customer's public name as shown there). While this list is
@@ -71,7 +72,7 @@ const INFO = {
 
 /* ---------- 5. Admin access ----------
    The admin page opens only by clicking the logo 3 times, then asks for the password every time
-   (a typed #/admin URL just shows the home page).
+   (a typed /admin address just shows the home page).
    Only a PBKDF2-SHA256 fingerprint of the password is stored here (600'000 rounds, random salt) — never the password.
    This is light protection: the site is static, so the check runs in the browser. It keeps visitors out of the admin
    page; publishing changes still requires access to GitHub / the hosting. Use a long, unique password.

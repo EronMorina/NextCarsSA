@@ -28,11 +28,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://images.unsplash.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="/assets/css/styles.css">
 
 </head>
 <body>
-<a class="skip" href="#/" data-skip data-i18n="aria.skip">Zum Inhalt springen</a>
+<a class="skip" href="/" data-skip data-i18n="aria.skip">Zum Inhalt springen</a>
 <!-- ================= ICON SPRITE ================= -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
@@ -101,48 +101,48 @@
 <!-- ================= HEADER ================= -->
 <header class="hdr" id="hdr">
   <div class="wrap">
-    <a href="#/" class="logo" aria-label="NEXT CARS SA">
+    <a href="/" class="logo" aria-label="NEXT CARS SA">
       <img class="logo-img" data-logo alt="NEXT CARS SA" width="207" height="46">
     </a>
     <nav class="nav" aria-label="Navigation">
-      <a href="#/search" data-nav="search" data-i18n="nav.cars">Fahrzeuge</a>
-      <a href="#/rims" data-nav="rims" data-i18n="nav.rims">Felgen</a>
-      <a href="#/financim" data-nav="financim" data-i18n="nav.fin">Finanzierung &amp; Leasing</a>
-      <a href="#/nderrim" data-nav="nderrim" data-i18n="nav.trade">Eintausch</a>
-      <a href="#/blejme" data-nav="blejme" data-i18n="nav.buy">Ankauf</a>
-      <a href="#/kontakt" data-nav="kontakt" data-i18n="nav.contact">Kontakt</a>
+      <a href="/fahrzeuge" data-nav="search" data-i18n="nav.cars">Fahrzeuge</a>
+      <a href="/felgen" data-nav="rims" data-i18n="nav.rims">Felgen</a>
+      <a href="/finanzierung" data-nav="financim" data-i18n="nav.fin">Finanzierung &amp; Leasing</a>
+      <a href="/eintausch" data-nav="nderrim" data-i18n="nav.trade">Eintausch</a>
+      <a href="/ankauf" data-nav="blejme" data-i18n="nav.buy">Ankauf</a>
+      <a href="/kontakt" data-nav="kontakt" data-i18n="nav.contact">Kontakt</a>
     </nav>
     <div class="hdr-right">
       <div class="lang">
         <button class="lang-btn" id="langBtn" aria-expanded="false" aria-controls="langMenu" data-i18n-aria="lang.label"><svg class="ico sm"><use href="#i-globe"/></svg><span id="langCur">DE</span><svg class="ico sm"><use href="#i-down"/></svg></button>
         <div class="menu" id="langMenu"></div>
       </div>
-      <a href="#/favourites" class="icon-btn hdr-fav" data-i18n-aria="nav.favs"><svg class="ico lg"><use href="#i-heart"/></svg><span class="count-pill" data-favcount data-n="0"></span></a>
+      <a href="/favoriten" class="icon-btn hdr-fav" data-i18n-aria="nav.favs"><svg class="ico lg"><use href="#i-heart"/></svg><span class="count-pill" data-favcount data-n="0"></span></a>
       <a class="btn btn-wa btn-sm hide-sm" data-wa-general target="_blank" rel="noopener"><svg class="ico sm fill"><use href="#i-wa"/></svg>WhatsApp</a>
       <button class="icon-btn burger" id="burger" aria-expanded="false" aria-controls="drawer" data-i18n-aria="aria.menu"><svg class="ico lg"><use href="#i-menu"/></svg></button>
     </div>
   </div>
 </header>
-<div class="adm-bar" id="admBar" hidden><div class="wrap"><span><svg class="ico sm"><use href="#i-eye"/></svg> <span data-i18n="adm.draft"></span></span><a href="#/admin" data-i18n="adm.title"></a></div></div>
+<div class="adm-bar" id="admBar" hidden><div class="wrap"><span><svg class="ico sm"><use href="#i-eye"/></svg> <span data-i18n="adm.draft"></span></span><a href="/admin" data-i18n="adm.title"></a></div></div>
 
 <!-- Mobile drawer -->
 <div class="scrim" id="scrim"></div>
 <aside class="drawer" id="drawer" aria-label="Menu">
   <div class="drawer-top">
-    <a href="#/" class="logo"><img class="logo-img" data-logo alt="NEXT CARS SA" width="180" height="40"></a>
+    <a href="/" class="logo"><img class="logo-img" data-logo alt="NEXT CARS SA" width="180" height="40"></a>
     <button class="icon-btn" id="drawerClose" data-i18n-aria="aria.close"><svg class="ico lg"><use href="#i-x"/></svg></button>
   </div>
   <nav>
-    <a href="#/"><svg class="ico"><use href="#i-home"/></svg><span data-i18n="nav.home">Startseite</span></a>
-    <a href="#/search"><svg class="ico"><use href="#i-car"/></svg><span data-i18n="nav.cars">Fahrzeuge</span></a>
-    <a href="#/rims"><svg class="ico"><use href="#i-rim"/></svg><span data-i18n="nav.rims">Felgen</span></a>
-    <a href="#/financim"><svg class="ico"><use href="#i-bank"/></svg><span data-i18n="nav.fin">Finanzierung &amp; Leasing</span></a>
-    <a href="#/nderrim"><svg class="ico"><use href="#i-swap"/></svg><span data-i18n="nav.tradeLong">Eintausch / Reprise</span></a>
-    <a href="#/blejme"><svg class="ico"><use href="#i-tag"/></svg><span data-i18n="nav.buyLong">Wir kaufen Ihr Auto</span></a>
-    <a href="#/?s=garancia"><svg class="ico"><use href="#i-shield"/></svg><span data-i18n="nav.warranty">Garantie &amp; Aufbereitung</span></a>
-    <a href="#/?s=dergesa"><svg class="ico"><use href="#i-truck"/></svg><span data-i18n="nav.delivery">Lieferung in die ganze Schweiz</span></a>
-    <a href="#/kontakt"><svg class="ico"><use href="#i-pin"/></svg><span data-i18n="nav.contact">Kontakt</span></a>
-    <a href="#/favourites"><svg class="ico"><use href="#i-heart"/></svg><span data-i18n="nav.favs">Favoriten</span><span class="count-pill" data-favcount data-n="0"></span></a>
+    <a href="/"><svg class="ico"><use href="#i-home"/></svg><span data-i18n="nav.home">Startseite</span></a>
+    <a href="/fahrzeuge"><svg class="ico"><use href="#i-car"/></svg><span data-i18n="nav.cars">Fahrzeuge</span></a>
+    <a href="/felgen"><svg class="ico"><use href="#i-rim"/></svg><span data-i18n="nav.rims">Felgen</span></a>
+    <a href="/finanzierung"><svg class="ico"><use href="#i-bank"/></svg><span data-i18n="nav.fin">Finanzierung &amp; Leasing</span></a>
+    <a href="/eintausch"><svg class="ico"><use href="#i-swap"/></svg><span data-i18n="nav.tradeLong">Eintausch / Reprise</span></a>
+    <a href="/ankauf"><svg class="ico"><use href="#i-tag"/></svg><span data-i18n="nav.buyLong">Wir kaufen Ihr Auto</span></a>
+    <a href="/?s=garancia"><svg class="ico"><use href="#i-shield"/></svg><span data-i18n="nav.warranty">Garantie &amp; Aufbereitung</span></a>
+    <a href="/?s=dergesa"><svg class="ico"><use href="#i-truck"/></svg><span data-i18n="nav.delivery">Lieferung in die ganze Schweiz</span></a>
+    <a href="/kontakt"><svg class="ico"><use href="#i-pin"/></svg><span data-i18n="nav.contact">Kontakt</span></a>
+    <a href="/favoriten"><svg class="ico"><use href="#i-heart"/></svg><span data-i18n="nav.favs">Favoriten</span><span class="count-pill" data-favcount data-n="0"></span></a>
   </nav>
   <div class="langs" id="drawerLangs"></div>
   <div class="foot" id="drawerFoot"></div>
@@ -159,8 +159,8 @@
       <h1><span data-i18n="hero.t1">Ihr nächstes Auto</span> <span class="goldtxt" data-i18n="hero.t2">wartet hier.</span></h1>
       <p class="hero-sub" data-i18n="hero.sub">Verkauf, Leasing, Finanzierung und Eintausch von Fahrzeugen – mit Lieferung in die ganze Schweiz.</p>
       <div class="hero-actions">
-        <a href="#/search" class="btn btn-primary btn-lg"><svg class="ico"><use href="#i-car"/></svg><span data-i18n="nav.cars">Fahrzeuge</span></a>
-        <a href="#/blejme" class="btn btn-glass btn-lg"><svg class="ico"><use href="#i-tag"/></svg><span data-i18n="nav.buyLong">Wir kaufen Ihr Auto</span></a>
+        <a href="/fahrzeuge" class="btn btn-primary btn-lg"><svg class="ico"><use href="#i-car"/></svg><span data-i18n="nav.cars">Fahrzeuge</span></a>
+        <a href="/ankauf" class="btn btn-glass btn-lg"><svg class="ico"><use href="#i-tag"/></svg><span data-i18n="nav.buyLong">Wir kaufen Ihr Auto</span></a>
       </div>
 
       <form class="search-panel" id="heroSearch" autocomplete="off">
@@ -191,7 +191,7 @@
         </div>
         <div class="sp-foot">
           <button type="button" class="adv-toggle" id="advToggle"><svg class="ico sm"><use href="#i-sliders"/></svg><span data-i18n="hero.adv">Erweiterte Suche</span><svg class="ico sm"><use href="#i-down"/></svg></button>
-          <span class="sp-hint"><a href="#/blejme" class="link" style="font-size:13.5px"><span data-i18n="hero.sellq">Verkaufen statt kaufen? Wir kaufen Ihr Auto</span><svg class="ico sm"><use href="#i-arrow"/></svg></a></span>
+          <span class="sp-hint"><a href="/ankauf" class="link" style="font-size:13.5px"><span data-i18n="hero.sellq">Verkaufen statt kaufen? Wir kaufen Ihr Auto</span><svg class="ico sm"><use href="#i-arrow"/></svg></a></span>
         </div>
       </form>
 
@@ -208,10 +208,10 @@
 
   <div class="stats svc-strip">
     <div class="wrap">
-      <a href="#/financim?tab=leasing"><svg class="ico"><use href="#i-key"/></svg><div><b>Leasing</b><span data-i18n="svc.leasingSub">Leasing-Offerte anfragen</span></div></a>
-      <a href="#/financim"><svg class="ico"><use href="#i-bank"/></svg><div><b data-i18n="svc.fin">Finanzierung</b><span data-i18n="svc.finSub">Nach Bewilligung durch die Bank</span></div></a>
-      <a href="#/nderrim"><svg class="ico"><use href="#i-swap"/></svg><div><b data-i18n="nav.tradeLong">Eintausch / Reprise</b><span data-i18n="svc.tradeSub">Bewertung Ihres Autos</span></div></a>
-      <a href="#/?s=dergesa"><svg class="ico"><use href="#i-truck"/></svg><div><b data-i18n="svc.del">Lieferung</b><span data-i18n="svc.delSub">In die ganze Schweiz</span></div></a>
+      <a href="/finanzierung?tab=leasing"><svg class="ico"><use href="#i-key"/></svg><div><b>Leasing</b><span data-i18n="svc.leasingSub">Leasing-Offerte anfragen</span></div></a>
+      <a href="/finanzierung"><svg class="ico"><use href="#i-bank"/></svg><div><b data-i18n="svc.fin">Finanzierung</b><span data-i18n="svc.finSub">Nach Bewilligung durch die Bank</span></div></a>
+      <a href="/eintausch"><svg class="ico"><use href="#i-swap"/></svg><div><b data-i18n="nav.tradeLong">Eintausch / Reprise</b><span data-i18n="svc.tradeSub">Bewertung Ihres Autos</span></div></a>
+      <a href="/?s=dergesa"><svg class="ico"><use href="#i-truck"/></svg><div><b data-i18n="svc.del">Lieferung</b><span data-i18n="svc.delSub">In die ganze Schweiz</span></div></a>
     </div>
   </div>
 
@@ -219,7 +219,7 @@
     <div class="wrap">
       <div class="sec-head">
         <div><span class="kicker" data-i18n="k.stock">Unser Bestand</span><h2 data-i18n="nav.cars">Fahrzeuge</h2><p data-i18n="s.carsSub">Ausgewählte Fahrzeuge von NEXT CARS SA.</p></div>
-        <a href="#/search" class="link"><span data-i18n="s.viewAll">Alle anzeigen</span><svg class="ico sm"><use href="#i-arrow"/></svg></a>
+        <a href="/fahrzeuge" class="link"><span data-i18n="s.viewAll">Alle anzeigen</span><svg class="ico sm"><use href="#i-arrow"/></svg></a>
       </div>
       <div class="grid hgrid" id="featuredGrid"></div>
     </div>
@@ -229,7 +229,7 @@
     <div class="wrap">
       <div class="sec-head">
         <div><span class="kicker" data-i18n="k.browse">Entdecken</span><h2 data-i18n="s.brands">Marken an Lager</h2></div>
-        <a href="#/search" class="link"><span data-i18n="s.allBrands">Alle Marken</span><svg class="ico sm"><use href="#i-arrow"/></svg></a>
+        <a href="/fahrzeuge" class="link"><span data-i18n="s.allBrands">Alle Marken</span><svg class="ico sm"><use href="#i-arrow"/></svg></a>
       </div>
       <div class="brands" id="brandGrid"></div>
       <div class="sec-head" style="margin-top:48px">
@@ -253,7 +253,7 @@
     <div class="wrap">
       <div class="sec-head">
         <div><span class="kicker" data-i18n="rims.homeK">Zubehör</span><h2 data-i18n="nav.rims">Felgen</h2><p data-i18n="rims.sub"></p></div>
-        <div style="display:flex;align-items:center;gap:14px"><a href="#/rims" class="link"><span data-i18n="rims.viewAll">Alle Felgen</span><svg class="ico sm"><use href="#i-arrow"/></svg></a><div class="rail-nav" data-rail="rimRail"><button data-i18n-aria="aria.prev"><svg class="ico"><use href="#i-left"/></svg></button><button data-i18n-aria="aria.next"><svg class="ico"><use href="#i-right"/></svg></button></div></div>
+        <div style="display:flex;align-items:center;gap:14px"><a href="/felgen" class="link"><span data-i18n="rims.viewAll">Alle Felgen</span><svg class="ico sm"><use href="#i-arrow"/></svg></a><div class="rail-nav" data-rail="rimRail"><button data-i18n-aria="aria.prev"><svg class="ico"><use href="#i-left"/></svg></button><button data-i18n-aria="aria.next"><svg class="ico"><use href="#i-right"/></svg></button></div></div>
       </div>
       <div class="rail" id="rimRail"></div>
     </div>
@@ -263,12 +263,12 @@
     <div class="wrap">
       <div class="sec-head"><div><span class="kicker" data-i18n="k.services">Dienstleistungen</span><h2 data-i18n="s.services">Alles für Ihr nächstes Auto</h2><p data-i18n="s.servicesSub">Von der Fahrzeugwahl bis zur Übergabe – alles aus einer Hand.</p></div></div>
       <div class="trust">
-        <a class="tcard" href="#/financim?tab=leasing"><div class="ticon"><svg class="ico"><use href="#i-key"/></svg></div><h3>Leasing</h3><p data-i18n="sv.leasing.p"></p><span class="more"><span data-i18n="lead.leasing.title"></span><svg class="ico sm"><use href="#i-arrow"/></svg></span></a>
-        <a class="tcard" href="#/financim"><div class="ticon"><svg class="ico"><use href="#i-bank"/></svg></div><h3 data-i18n="svc.fin"></h3><p data-i18n="sv.fin.p"></p><span class="more"><span data-i18n="btn.reqFin"></span><svg class="ico sm"><use href="#i-arrow"/></svg></span></a>
-        <a class="tcard" href="#/nderrim"><div class="ticon"><svg class="ico"><use href="#i-swap"/></svg></div><h3 data-i18n="nav.tradeLong"></h3><p data-i18n="sv.trade.p"></p><span class="more"><span data-i18n="sv.trade.cta"></span><svg class="ico sm"><use href="#i-arrow"/></svg></span></a>
-        <a class="tcard" href="#/blejme"><div class="ticon"><svg class="ico"><use href="#i-tag"/></svg></div><h3 data-i18n="nav.buyLong"></h3><p data-i18n="sv.buy.p"></p><span class="more"><span data-i18n="sv.buy.cta"></span><svg class="ico sm"><use href="#i-arrow"/></svg></span></a>
-        <a class="tcard" href="#/search"><div class="ticon"><svg class="ico"><use href="#i-cal"/></svg></div><h3 data-i18n="sv.td.title"></h3><p data-i18n="sv.td.p"></p><span class="more"><span data-i18n="sv.td.cta"></span><svg class="ico sm"><use href="#i-arrow"/></svg></span></a>
-        <a class="tcard" href="#/?s=dergesa"><div class="ticon"><svg class="ico"><use href="#i-truck"/></svg></div><h3 data-i18n="nav.delivery"></h3><p data-i18n="sv.del.p"></p><span class="more"><span data-i18n="lead.delivery.title"></span><svg class="ico sm"><use href="#i-arrow"/></svg></span></a>
+        <a class="tcard" href="/finanzierung?tab=leasing"><div class="ticon"><svg class="ico"><use href="#i-key"/></svg></div><h3>Leasing</h3><p data-i18n="sv.leasing.p"></p><span class="more"><span data-i18n="lead.leasing.title"></span><svg class="ico sm"><use href="#i-arrow"/></svg></span></a>
+        <a class="tcard" href="/finanzierung"><div class="ticon"><svg class="ico"><use href="#i-bank"/></svg></div><h3 data-i18n="svc.fin"></h3><p data-i18n="sv.fin.p"></p><span class="more"><span data-i18n="btn.reqFin"></span><svg class="ico sm"><use href="#i-arrow"/></svg></span></a>
+        <a class="tcard" href="/eintausch"><div class="ticon"><svg class="ico"><use href="#i-swap"/></svg></div><h3 data-i18n="nav.tradeLong"></h3><p data-i18n="sv.trade.p"></p><span class="more"><span data-i18n="sv.trade.cta"></span><svg class="ico sm"><use href="#i-arrow"/></svg></span></a>
+        <a class="tcard" href="/ankauf"><div class="ticon"><svg class="ico"><use href="#i-tag"/></svg></div><h3 data-i18n="nav.buyLong"></h3><p data-i18n="sv.buy.p"></p><span class="more"><span data-i18n="sv.buy.cta"></span><svg class="ico sm"><use href="#i-arrow"/></svg></span></a>
+        <a class="tcard" href="/fahrzeuge"><div class="ticon"><svg class="ico"><use href="#i-cal"/></svg></div><h3 data-i18n="sv.td.title"></h3><p data-i18n="sv.td.p"></p><span class="more"><span data-i18n="sv.td.cta"></span><svg class="ico sm"><use href="#i-arrow"/></svg></span></a>
+        <a class="tcard" href="/?s=dergesa"><div class="ticon"><svg class="ico"><use href="#i-truck"/></svg></div><h3 data-i18n="nav.delivery"></h3><p data-i18n="sv.del.p"></p><span class="more"><span data-i18n="lead.delivery.title"></span><svg class="ico sm"><use href="#i-arrow"/></svg></span></a>
       </div>
     </div>
   </section>
@@ -285,8 +285,8 @@
           <div class="s3"><i>3</i><div><b data-i18n="st3.b"></b><span data-i18n="st3.s"></span></div></div>
         </div>
         <div class="btn-pair">
-          <a href="#/blejme" class="btn btn-dark btn-lg"><span data-i18n="s.sellBtn"></span><svg class="ico"><use href="#i-arrow"/></svg></a>
-          <a href="#/nderrim" class="btn btn-line btn-lg"><svg class="ico"><use href="#i-swap"/></svg><span data-i18n="nav.tradeLong"></span></a>
+          <a href="/ankauf" class="btn btn-dark btn-lg"><span data-i18n="s.sellBtn"></span><svg class="ico"><use href="#i-arrow"/></svg></a>
+          <a href="/eintausch" class="btn btn-line btn-lg"><svg class="ico"><use href="#i-swap"/></svg><span data-i18n="nav.tradeLong"></span></a>
         </div>
       </div>
       <div class="visual">
@@ -317,7 +317,7 @@
         <ul><li><svg class="ico sm"><use href="#i-pin"/></svg><span data-i18n="del.li1"></span></li><li><svg class="ico sm"><use href="#i-file"/></svg><span data-i18n="del.li2"></span></li></ul>
         <div class="row">
           <button class="btn btn-primary btn-lg" data-lead="delivery"><svg class="ico"><use href="#i-truck"/></svg><span data-i18n="lead.delivery.title"></span></button>
-          <a href="#/search" class="btn btn-white btn-lg"><span data-i18n="nav.cars"></span></a>
+          <a href="/fahrzeuge" class="btn btn-white btn-lg"><span data-i18n="nav.cars"></span></a>
         </div>
       </div>
     </div>
@@ -342,8 +342,8 @@
 <section class="view" data-view="search">
   <div class="page-head">
     <div class="wrap">
-      <div class="crumbs"><a href="#/" data-i18n="nav.home"></a><svg class="ico"><use href="#i-right"/></svg><a href="#/search" data-i18n="nav.cars"></a><svg class="ico"><use href="#i-right"/></svg><b id="crumbLast"></b></div>
-      <nav class="cat-tabs" data-i18n-aria="nav.cat"><a href="#/search" class="on" aria-current="page"><svg class="ico sm"><use href="#i-car"/></svg><span data-i18n="nav.cars">Fahrzeuge</span></a><a href="#/rims" ><svg class="ico sm"><use href="#i-rim"/></svg><span data-i18n="nav.rims">Felgen</span></a></nav>
+      <div class="crumbs"><a href="/" data-i18n="nav.home"></a><svg class="ico"><use href="#i-right"/></svg><a href="/fahrzeuge" data-i18n="nav.cars"></a><svg class="ico"><use href="#i-right"/></svg><b id="crumbLast"></b></div>
+      <nav class="cat-tabs" data-i18n-aria="nav.cat"><a href="/fahrzeuge" class="on" aria-current="page"><svg class="ico sm"><use href="#i-car"/></svg><span data-i18n="nav.cars">Fahrzeuge</span></a><a href="/felgen" ><svg class="ico sm"><use href="#i-rim"/></svg><span data-i18n="nav.rims">Felgen</span></a></nav>
       <h1 id="resTitle"></h1>
     </div>
   </div>
@@ -379,8 +379,8 @@
 <section class="view" data-view="rims">
   <div class="page-head">
     <div class="wrap">
-      <div class="crumbs"><a href="#/" data-i18n="nav.home"></a><svg class="ico"><use href="#i-right"/></svg><a href="#/rims" data-i18n="nav.rims"></a><svg class="ico"><use href="#i-right"/></svg><b id="rCrumbLast"></b></div>
-      <nav class="cat-tabs" data-i18n-aria="nav.cat"><a href="#/search" ><svg class="ico sm"><use href="#i-car"/></svg><span data-i18n="nav.cars">Fahrzeuge</span></a><a href="#/rims" class="on" aria-current="page"><svg class="ico sm"><use href="#i-rim"/></svg><span data-i18n="nav.rims">Felgen</span></a></nav>
+      <div class="crumbs"><a href="/" data-i18n="nav.home"></a><svg class="ico"><use href="#i-right"/></svg><a href="/felgen" data-i18n="nav.rims"></a><svg class="ico"><use href="#i-right"/></svg><b id="rCrumbLast"></b></div>
+      <nav class="cat-tabs" data-i18n-aria="nav.cat"><a href="/fahrzeuge" ><svg class="ico sm"><use href="#i-car"/></svg><span data-i18n="nav.cars">Fahrzeuge</span></a><a href="/felgen" class="on" aria-current="page"><svg class="ico sm"><use href="#i-rim"/></svg><span data-i18n="nav.rims">Felgen</span></a></nav>
       <h1 id="rTitle"></h1>
       <p class="sub" data-i18n="rims.sub"></p>
     </div>
@@ -413,7 +413,7 @@
   </div>
 </section>
 
-<!-- ================= VEHICLE DETAIL (also used for a rim listing: #/rim/:id) ================= -->
+<!-- ================= VEHICLE DETAIL (also used for a rim listing: /felge/:id) ================= -->
 <section class="view" data-view="car"><div class="wrap" id="carView"></div></section>
 
 <!-- ================= TRADE-IN / WE BUY YOUR CAR (shared wizard) ================= -->
@@ -421,7 +421,7 @@
   <div class="sell-hero">
     <img id="sellHeroImg" alt="">
     <div class="wrap">
-      <div class="crumbs"><a href="#/" data-i18n="nav.home"></a><svg class="ico"><use href="#i-right"/></svg><b id="wzCrumb"></b></div>
+      <div class="crumbs"><a href="/" data-i18n="nav.home"></a><svg class="ico"><use href="#i-right"/></svg><b id="wzCrumb"></b></div>
       <h1 id="wzTitle"></h1>
       <p id="wzLead"></p>
       <div class="sell-perks" id="wzPerks"></div>
@@ -444,7 +444,7 @@
 <section class="view" data-view="financim">
   <div class="page-head">
     <div class="wrap">
-      <div class="crumbs"><a href="#/" data-i18n="nav.home"></a><svg class="ico"><use href="#i-right"/></svg><b data-i18n="nav.fin"></b></div>
+      <div class="crumbs"><a href="/" data-i18n="nav.home"></a><svg class="ico"><use href="#i-right"/></svg><b data-i18n="nav.fin"></b></div>
       <h1 data-i18n="nav.fin"></h1>
       <p class="sub" data-i18n="fin.pageSub"></p>
     </div>
@@ -472,7 +472,7 @@
 <section class="view" data-view="kontakt">
   <div class="page-head">
     <div class="wrap">
-      <div class="crumbs"><a href="#/" data-i18n="nav.home"></a><svg class="ico"><use href="#i-right"/></svg><b data-i18n="nav.contact"></b></div>
+      <div class="crumbs"><a href="/" data-i18n="nav.home"></a><svg class="ico"><use href="#i-right"/></svg><b data-i18n="nav.contact"></b></div>
       <h1 data-i18n="nav.contact"></h1>
       <p class="sub">NEXT CARS SA · <span data-i18n="appt"></span></p>
     </div>
@@ -488,7 +488,7 @@
 <section class="view" data-view="favourites">
   <div class="page-head">
     <div class="wrap">
-      <div class="crumbs"><a href="#/" data-i18n="nav.home"></a><svg class="ico"><use href="#i-right"/></svg><b data-i18n="nav.favs"></b></div>
+      <div class="crumbs"><a href="/" data-i18n="nav.home"></a><svg class="ico"><use href="#i-right"/></svg><b data-i18n="nav.favs"></b></div>
       <div class="fav-head"><div><h1 data-i18n="nav.favs"></h1><p class="sub" id="favSub"></p></div><button class="btn btn-line btn-sm" id="favClear" hidden><svg class="ico sm"><use href="#i-trash"/></svg><span data-i18n="favs.clear"></span></button></div>
     </div>
   </div>
@@ -499,7 +499,7 @@
 <section class="view" data-view="admin">
   <div class="page-head">
     <div class="wrap">
-      <div class="crumbs"><a href="#/" data-i18n="nav.home"></a><svg class="ico"><use href="#i-right"/></svg><b data-i18n="adm.title"></b></div>
+      <div class="crumbs"><a href="/" data-i18n="nav.home"></a><svg class="ico"><use href="#i-right"/></svg><b data-i18n="adm.title"></b></div>
       <h1 data-i18n="adm.title"></h1>
       <p class="sub" data-i18n="adm.intro" style="max-width:80ch"></p>
     </div>
@@ -514,14 +514,14 @@
   <div class="wrap">
     <div class="ftr-grid">
       <div class="ftr-brand">
-        <a href="#/" class="logo"><img class="logo-img" data-logo alt="NEXT CARS SA" width="216" height="48" style="height:48px"></a>
+        <a href="/" class="logo"><img class="logo-img" data-logo alt="NEXT CARS SA" width="216" height="48" style="height:48px"></a>
         <p data-i18n="ftr.tag"></p>
         <ul id="ftrContact"></ul>
         <div class="social" id="ftrSocial" hidden style="margin-top:16px"></div>
       </div>
-      <div><h2 data-i18n="ftr.cars"></h2><ul><li><a href="#/search" data-i18n="nav.cars"></a></li><li><a href="#/rims" data-i18n="nav.rims"></a></li><li><a href="#/search" data-i18n="sv.td.title"></a></li><li><a href="#/favourites" data-i18n="nav.favs"></a></li></ul></div>
-      <div><h2 data-i18n="k.services"></h2><ul><li><a href="#/financim?tab=leasing">Leasing</a></li><li><a href="#/financim" data-i18n="svc.fin"></a></li><li><a href="#/nderrim" data-i18n="nav.tradeLong"></a></li><li><a href="#/blejme" data-i18n="nav.buyLong"></a></li><li><a href="#/?s=dergesa" data-i18n="nav.delivery"></a></li></ul></div>
-      <div><h2>NEXT CARS SA</h2><ul><li><a href="#/?s=garancia" data-i18n="nav.warranty"></a></li><li id="ftrReviews" hidden><a href="#/?s=vleresimet" data-i18n="k.reviews"></a></li><li><a href="#/kontakt" data-i18n="nav.contact"></a></li></ul></div>
+      <div><h2 data-i18n="ftr.cars"></h2><ul><li><a href="/fahrzeuge" data-i18n="nav.cars"></a></li><li><a href="/felgen" data-i18n="nav.rims"></a></li><li><a href="/fahrzeuge" data-i18n="sv.td.title"></a></li><li><a href="/favoriten" data-i18n="nav.favs"></a></li></ul></div>
+      <div><h2 data-i18n="k.services"></h2><ul><li><a href="/finanzierung?tab=leasing">Leasing</a></li><li><a href="/finanzierung" data-i18n="svc.fin"></a></li><li><a href="/eintausch" data-i18n="nav.tradeLong"></a></li><li><a href="/ankauf" data-i18n="nav.buyLong"></a></li><li><a href="/?s=dergesa" data-i18n="nav.delivery"></a></li></ul></div>
+      <div><h2>NEXT CARS SA</h2><ul><li><a href="/?s=garancia" data-i18n="nav.warranty"></a></li><li id="ftrReviews" hidden><a href="/?s=vleresimet" data-i18n="k.reviews"></a></li><li><a href="/kontakt" data-i18n="nav.contact"></a></li></ul></div>
       <div><h2 data-i18n="ftr.legal"></h2><ul><li><a href="#" data-info="imprint" data-i18n="ftr.imprint"></a></li><li><a href="#" data-info="privacy" data-i18n="ftr.privacy"></a></li></ul></div>
     </div>
     <div class="ftr-bottom">
@@ -558,11 +558,11 @@
   <input type="file" name="photo5"><input type="file" name="photo6"><input type="file" name="photo7"><input type="file" name="photo8">
   <input type="file" name="photo9"><input type="file" name="photo10"><input type="file" name="photo11"><input type="file" name="photo12">
 </form>
-<script src="assets/js/config.js"></script>
-<script src="assets/js/vehicles.js"></script>
-<script src="assets/js/rims.js"></script>
-<script src="assets/js/inventory.js"></script>
-<script src="assets/js/i18n.js"></script>
-<script src="assets/js/app.js"></script>
+<script src="/assets/js/config.js"></script>
+<script src="/assets/js/vehicles.js"></script>
+<script src="/assets/js/rims.js"></script>
+<script src="/assets/js/inventory.js"></script>
+<script src="/assets/js/i18n.js"></script>
+<script src="/assets/js/app.js"></script>
 </body>
 </html>

@@ -68,7 +68,7 @@ const telHref = () => BUSINESS.phone ? 'tel:' + BUSINESS.phone.replace(/[^\d+]/g
 /* wa.me works on mobile (opens the app) and desktop (WhatsApp Desktop / Web).
    Without a configured number, wa.me/?text= lets the user pick the chat. */
 const waLink = text => `https://wa.me/${digits(BUSINESS.whatsapp).replace(/^00/, '')}?text=${encodeURIComponent(text)}`;
-const vehicleUrl = v => `${location.href.split(/[?#]/)[0]}#/car/${v.id}`;
+const vehicleUrl = v => `${location.origin}/fahrzeug/${v.id}`;
 const waVehicleText = v => tMsg('wa.vehicle', { car: `${v.title} ${v.variant}`, url: vehicleUrl(v) });
 /* WhatsApp buttons only exist while a WhatsApp number is configured */
 const hasWa = () => !!digits(BUSINESS.whatsapp);
@@ -134,7 +134,7 @@ function card(v) {
       <span class="imgcount">${ico('camera')}${v.gallery.length}</span>
     </div>
     <div class="c-body">
-      <div><div class="c-title"><a class="c-link" href="#/car/${v.id}">${esc(v.title)}<span class="sr"> ${esc(v.variant)}, ${chf(v.price)}</span></a></div><div class="c-var">${esc(v.variant)}</div></div>
+      <div><div class="c-title"><a class="c-link" href="/fahrzeug/${v.id}">${esc(v.title)}<span class="sr"> ${esc(v.variant)}, ${chf(v.price)}</span></a></div><div class="c-var">${esc(v.variant)}</div></div>
       <div class="specs">
         <span>${ico('cal')}${reg(v)}</span>
         <span>${ico('gauge')}${km(v.km)}</span>
@@ -206,8 +206,8 @@ function initHero() {
   $('#heroSearch').addEventListener('submit', e => e.preventDefault()); // Enter in the keyword field must not reload the page
   $('#advToggle').addEventListener('click', () => { $('#spAdv').classList.toggle('open'); $('#advToggle').classList.toggle('open'); });
   $$('.sp-tab').forEach(b => b.addEventListener('click', () => { $$('.sp-tab').forEach(x => { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); }); b.classList.add('on'); b.setAttribute('aria-pressed', 'true'); state.seg = b.dataset.seg; updateHeroCount(); }));
-  $('#hsGo').addEventListener('click', () => { F = heroFilters(); go('#/search'); });
-  $('#kw').addEventListener('keydown', e => { if (e.key === 'Enter' && !$('.ac-i.hl')) { e.preventDefault(); F = heroFilters(); go('#/search'); } });
+  $('#hsGo').addEventListener('click', () => { F = heroFilters(); go('/fahrzeuge'); });
+  $('#kw').addEventListener('keydown', e => { if (e.key === 'Enter' && !$('.ac-i.hl')) { e.preventDefault(); F = heroFilters(); go('/fahrzeuge'); } });
   initAutocomplete();
   $$('[data-quick]').forEach(b => b.addEventListener('click', () => {
     const q = b.dataset.quick; F = DEF();
@@ -216,7 +216,7 @@ function initHero() {
     if (q === 'auto-awd') { F.trans = ['Automatic']; F.drive = ['AWD']; }
     if (q === 'lowkm') F.km = 30000;
     if (q === 'sports') { F.body = ['Coupé', 'Convertible']; F.psmin = 400; }
-    go('#/search');
+    go('/fahrzeuge');
   }));
 }
 function heroFilters() {
@@ -271,7 +271,7 @@ function initAutocomplete() {
     const it = items[idx]; box.classList.remove('open');
     const f = heroFilters(); f.q = '';
     if (it && !it.kw) { it.apply(f); input.value = ''; } else f.q = input.value.trim();
-    F = f; go('#/search');
+    F = f; go('/fahrzeuge');
   };
   input.addEventListener('focus', render);
   input.addEventListener('input', render);
@@ -447,7 +447,7 @@ function openFilters(open, sel = '#filters') {
 let G = { v: null, i: 0 };
 function renderCar(id) {
   const v = byId(id), root = $('#carView');
-  if (!v) { root.innerHTML = `<div class="empty" style="margin:40px 0"><div class="e-ic">${ico('car')}</div><h2>${t('det.notFound')}</h2><p>${t('det.notFoundP')}</p><div class="row"><a class="btn btn-dark" href="#/search">${t('nav.cars')}</a></div></div>`; $('#mbar').innerHTML = ''; return; }
+  if (!v) { root.innerHTML = `<div class="empty" style="margin:40px 0"><div class="e-ic">${ico('car')}</div><h2>${t('det.notFound')}</h2><p>${t('det.notFoundP')}</p><div class="row"><a class="btn btn-dark" href="/fahrzeuge">${t('nav.cars')}</a></div></div>`; $('#mbar').innerHTML = ''; return; }
   G = { v, i: 0 };
   const fav = state.favs.has(v.id);
   const similar = VEHICLES.filter(x => x.id !== v.id).map(x => [x, (x.body === v.body ? 2 : 0) + (x.make === v.make ? 2 : 0) + (Math.abs(x.price - v.price) < v.price * 0.35 ? 1.5 : 0)]).sort((a, b) => b[1] - a[1]).slice(0, 8).map(x => x[0]);
@@ -470,7 +470,7 @@ function renderCar(id) {
         <button class="btn btn-primary btn-lg full" data-lead="testdrive" data-car="${v.id}">${ico('cal')}${t('sv.td.title')}</button>
         <button class="btn btn-dark full" data-lead="leasing" data-car="${v.id}">${ico('key', 'sm')}${t('lead.leasing.title')}</button>
         <button class="btn btn-line" data-lead="financing" data-car="${v.id}">${ico('bank', 'sm')}${t('svc.fin')}</button>
-        <a class="btn btn-line" href="#/nderrim?car=${v.id}">${ico('swap', 'sm')}${t('nav.trade')}</a>
+        <a class="btn btn-line" href="/eintausch?car=${v.id}">${ico('swap', 'sm')}${t('nav.trade')}</a>
         <button class="btn btn-line full" data-lead="inquiry" data-car="${v.id}">${ico('msg', 'sm')}${t('lead.inquiry.title')}</button>
         ${waBtn(v, 'btn btn-wa full')}
         ${phoneBtn('btn btn-ghost full')}
@@ -482,7 +482,7 @@ function renderCar(id) {
   <div class="det-top">
     <div style="display:flex;align-items:center;gap:10px;min-width:0">
       <button class="btn btn-line btn-sm" id="backBtn">${ico('back', 'sm')}${t('det.back')}</button>
-      <div class="crumbs"><a href="#/">${t('nav.home')}</a>${ico('right')}<a href="#/search">${t('nav.cars')}</a>${ico('right')}<a href="#/search" data-brand="${esc(v.make)}">${esc(v.make)}</a>${ico('right')}<b>${esc(v.model)}</b></div>
+      <div class="crumbs"><a href="/">${t('nav.home')}</a>${ico('right')}<a href="/fahrzeuge">${t('nav.cars')}</a>${ico('right')}<a href="/fahrzeuge" data-brand="${esc(v.make)}">${esc(v.make)}</a>${ico('right')}<b>${esc(v.model)}</b></div>
     </div>
     <div class="det-actions">
       <button class="btn btn-line btn-sm" id="shareBtn">${ico('share', 'sm')}<span class="hide-xs">${t('det.share')}</span></button>
@@ -501,7 +501,7 @@ function renderCar(id) {
         <p style="color:var(--ink-2)">${v.warranty ? `<b>${t('det.warranty')}:</b> ${esc(loc(v.warranty))}` : `<b>${esc(stdWarrantyText())}</b>`}</p>
         <p style="color:var(--ink-2);margin-top:8px">${esc(t('insp.tagX', { x: '\u0000' })).replace('\u0000', `<b>${esc(insp)}</b>`)}</p>
         <p style="color:var(--muted);font-size:14px;margin-top:6px">${t('warranty.ext')} ${t('det.wSee')}</p>
-        <div class="row2"><button class="btn btn-dark btn-sm" data-lead="inquiry" data-car="${v.id}" data-extw="1">${ico('shield', 'sm')}${t('warranty.extBtn')}</button><a class="btn btn-line btn-sm" href="#/?s=garancia">${t('k.prep')}</a></div>
+        <div class="row2"><button class="btn btn-dark btn-sm" data-lead="inquiry" data-car="${v.id}" data-extw="1">${ico('shield', 'sm')}${t('warranty.extBtn')}</button><a class="btn btn-line btn-sm" href="/?s=garancia">${t('k.prep')}</a></div>
       </div>
       <div class="dbox" id="fin"><h2>${t('det.finT')}</h2>
         <div class="fin">
@@ -520,7 +520,7 @@ function renderCar(id) {
         <div class="notice" style="margin-top:18px">${ico('bank')}<span>${t('bank.notice')}</span></div>
         <div class="row2"><button class="btn btn-dark" data-lead="financing" data-car="${v.id}">${ico('bank', 'sm')}${t('btn.reqFin')}</button><button class="btn btn-line" data-lead="leasing" data-car="${v.id}">${ico('key', 'sm')}${t('lead.leasing.title')}</button></div>
       </div>
-      <div class="cta-box">${ico('swap', 'lead')}<div style="flex:1;min-width:220px"><b>${t('cta.tradeT')}</b><span>${t('cta.tradeS')}</span></div><a class="btn btn-white" href="#/nderrim?car=${v.id}">${t('nav.tradeLong')}${ico('arrow', 'sm')}</a></div>
+      <div class="cta-box">${ico('swap', 'lead')}<div style="flex:1;min-width:220px"><b>${t('cta.tradeT')}</b><span>${t('cta.tradeS')}</span></div><a class="btn btn-white" href="/eintausch?car=${v.id}">${t('nav.tradeLong')}${ico('arrow', 'sm')}</a></div>
       <div class="cta-box">${ico('truck', 'lead')}<div style="flex:1;min-width:220px"><b>${t('nav.delivery')}</b><span>${t('cta.delS')}</span></div><button class="btn btn-primary" data-lead="delivery" data-car="${v.id}">${t('lead.delivery.title')}</button></div>
       <div class="dbox pbox-mobile-only"><h2>NEXT CARS SA</h2>${dealerBox()}</div>
     </div>
@@ -540,7 +540,7 @@ function renderCar(id) {
 
   bindGallery();
   const fm = $('#featMore'); if (fm) fm.addEventListener('click', () => { $('#featList').innerHTML = feats.map(featItem).join(''); fm.remove(); });
-  $('#backBtn').addEventListener('click', () => { if (history.length > 1 && prevRoute) history.back(); else go('#/search'); });
+  $('#backBtn').addEventListener('click', () => { if (history.length > 1 && prevRoute) history.back(); else go('/fahrzeuge'); });
   $('#shareBtn').addEventListener('click', () => share(v));
   // Financing example
   const fp = $('#finPrice'), fd = $('#finDown'); let dur = 60;
@@ -611,7 +611,7 @@ function dealerBoxHtml(waHtml) {
       <div class="btns" style="display:grid;gap:10px">
         ${waHtml}
         ${BUSINESS.phone ? `<a class="btn btn-line" href="${telHref()}">${ico('phone')}${t('btn.call')}</a>` : ''}
-        <a class="btn btn-ghost" href="#/kontakt">${ico('pin')}${t('dealer.contact')}</a>
+        <a class="btn btn-ghost" href="/kontakt">${ico('pin')}${t('dealer.contact')}</a>
       </div>`;
 }
 const share = v => shareLink(vehicleUrl(v), `${v.title} ${v.variant} – NEXT CARS SA`, `${v.title} ${v.variant} – ${chf(v.price)}`);
@@ -629,7 +629,7 @@ async function shareLink(url, title, text) {
 const rimById = id => RIMS.find(r => r.id === +id);
 const rimLive = r => r.status !== 'hidden';            // shown on the site (on sale + sold)
 const rimOnSale = r => r.status === 'active';
-const rimUrl = r => `${location.href.split(/[?#]/)[0]}#/rim/${r.id}`;
+const rimUrl = r => `${location.origin}/felge/${r.id}`;
 const money = (n, cur = 'CHF') => `${cur} ${fmt(n)}`;
 const nRim = n => `${n} ${t(n === 1 ? 'rim.one' : 'rim.many')}`;
 const rimQty = r => r.qty === 1 ? t('rim.qty1') : t('rim.qtyN', { n: r.qty });
@@ -691,7 +691,7 @@ function rimCard(r) {
       <span class="imgcount">${ico('camera')}${r.photos.length}</span>
     </div>
     <div class="c-body">
-      <div><div class="c-title"><a class="c-link" href="#/rim/${r.id}">${esc(r.title)}<span class="sr">, ${price}</span></a></div><div class="c-var">${esc(r.brand)} · ${esc(L.rimMat[r.material])}</div></div>
+      <div><div class="c-title"><a class="c-link" href="/felge/${r.id}">${esc(r.title)}<span class="sr">, ${price}</span></a></div><div class="c-var">${esc(r.brand)} · ${esc(L.rimMat[r.material])}</div></div>
       <div class="specs">
         <span>${ico('rim')}${rimDim(r)}</span>
         <span>${ico('gear')}${esc(r.pcd)}</span>
@@ -704,7 +704,7 @@ function rimCard(r) {
   </article>`;
 }
 
-/* ---------- List page (#/rims) ---------- */
+/* ---------- List page (/felgen) ---------- */
 function renderRimFilters() {
   const live = RIMS.filter(rimLive);
   const uniq = fn => [...new Set(live.flatMap(r => [].concat(fn(r))).filter(x => x !== '' && x != null))];
@@ -787,11 +787,11 @@ function initRims() {
   $('#rfApply').addEventListener('click', () => { openFilters(false); window.scrollTo({ top: 0, behavior: 'smooth' }); });
 }
 
-/* ---------- Detail page (#/rim/:id) — rendered into the vehicle detail view, reusing its gallery ---------- */
+/* ---------- Detail page (/felge/:id) — rendered into the vehicle detail view, reusing its gallery ---------- */
 function renderRim(id) {
   const r = rimById(id), root = $('#carView');
   if (!r || !rimLive(r)) {
-    root.innerHTML = `<div class="empty" style="margin:40px 0"><div class="e-ic">${ico('rim')}</div><h2>${t('rim.notFound')}</h2><p>${t('rim.notFoundP')}</p><div class="row"><a class="btn btn-dark" href="#/rims">${t('rims.viewAll')}</a><button class="btn btn-line" data-lead="rim">${ico('msg')}${t('lead.rim.title')}</button></div></div>`;
+    root.innerHTML = `<div class="empty" style="margin:40px 0"><div class="e-ic">${ico('rim')}</div><h2>${t('rim.notFound')}</h2><p>${t('rim.notFoundP')}</p><div class="row"><a class="btn btn-dark" href="/felgen">${t('rims.viewAll')}</a><button class="btn btn-line" data-lead="rim">${ico('msg')}${t('lead.rim.title')}</button></div></div>`;
     $('#mbar').innerHTML = ''; return;
   }
   G = { v: r, i: 0 };
@@ -817,7 +817,7 @@ function renderRim(id) {
   <div class="det-top">
     <div style="display:flex;align-items:center;gap:10px;min-width:0">
       <button class="btn btn-line btn-sm" id="backBtn">${ico('back', 'sm')}${t('det.back')}</button>
-      <div class="crumbs"><a href="#/">${t('nav.home')}</a>${ico('right')}<a href="#/rims">${t('nav.rims')}</a>${ico('right')}<a href="#/rims?brand=${encodeURIComponent(r.brand)}">${esc(r.brand)}</a>${ico('right')}<b>${esc(r.title)}</b></div>
+      <div class="crumbs"><a href="/">${t('nav.home')}</a>${ico('right')}<a href="/felgen">${t('nav.rims')}</a>${ico('right')}<a href="/felgen?brand=${encodeURIComponent(r.brand)}">${esc(r.brand)}</a>${ico('right')}<b>${esc(r.title)}</b></div>
     </div>
     <div class="det-actions">
       <button class="btn btn-line btn-sm" id="shareBtn">${ico('share', 'sm')}<span class="hide-xs">${t('det.share')}</span></button>
@@ -845,7 +845,7 @@ function renderRim(id) {
     <div class="rail" id="simRail">${similar.map(rimCard).join('')}</div>
   </section>` : '<div style="height:64px"></div>'}`;
   bindGallery();
-  $('#backBtn').addEventListener('click', () => { if (history.length > 1 && prevRoute) history.back(); else go('#/rims'); });
+  $('#backBtn').addEventListener('click', () => { if (history.length > 1 && prevRoute) history.back(); else go('/felgen'); });
   $('#shareBtn').addEventListener('click', () => shareLink(rimUrl(r), `${r.title} – NEXT CARS SA`, `${r.title} – ${price}`));
   $('#mbar').innerHTML = `<div class="mp"><b class="num">${price}</b><span>${esc(r.title)}</span></div>${wa('btn btn-wa')}<button class="btn btn-primary" data-lead="rim" data-rim="${r.id}">${ico('msg')}${t('lead.rim.submit')}</button>`;
 }
@@ -868,7 +868,7 @@ function renderAdminRims(tabs) {
       <img src="${esc(IMG(r.img, 192, 144))}" alt="" data-fb>
       <div class="adm-main"><b>${esc(r.title)}</b><span>${esc(r.brand)} · ${rimDim(r)} · ${esc(r.pcd)} · ET ${r.et}</span><small>${money(r.price, r.currency)} · ${rimQty(r)} · ID ${r.id}</small></div>
       <label class="adm-status"><span>${t('adm.status')}</span><select class="select" data-adm-rstatus="${r.id}">${RIM_STATUSES.map(s => opt(s, L.rimStatus[s], r.status)).join('')}</select></label>
-      <div class="adm-acts">${rimLive(r) ? `<a class="btn btn-line btn-sm" href="#/rim/${r.id}" aria-label="${esc(r.title)}">${ico('eye', 'sm')}</a>` : ''}<button class="btn btn-dark btn-sm" data-adm="rim-edit" data-id="${r.id}">${ico('edit', 'sm')}${t('adm.edit')}</button><button class="btn btn-ghost btn-sm" data-adm="rim-delete" data-id="${r.id}" aria-label="${esc(t('adm.delete'))}">${ico('trash', 'sm')}</button></div>
+      <div class="adm-acts">${rimLive(r) ? `<a class="btn btn-line btn-sm" href="/felge/${r.id}" aria-label="${esc(r.title)}">${ico('eye', 'sm')}</a>` : ''}<button class="btn btn-dark btn-sm" data-adm="rim-edit" data-id="${r.id}">${ico('edit', 'sm')}${t('adm.edit')}</button><button class="btn btn-ghost btn-sm" data-adm="rim-delete" data-id="${r.id}" aria-label="${esc(t('adm.delete'))}">${ico('trash', 'sm')}</button></div>
     </div>`).join('')}</div>` : `<div class="empty" style="padding:36px 20px"><div class="e-ic">${ico('rim')}</div><p>${t('adm.rimsNone')}</p></div>`}`;
 }
 function openRimEditor(id) {
@@ -1159,7 +1159,9 @@ async function sendLead(type, title, rows, files) {
       // form rows; the selected car's id is sent as vehicle_id so it does not overwrite the readable "vehicle" field
       rows.forEach(r => { const k = r.k === 'vehicle' ? 'vehicle_id' : r.k; fd.append(k, r.raw); if (r.val !== r.raw) fd.append(k + '_label', r.val); });
       fd.append('summary', leadSummary(title, rows, files.length));
-      for (const [i, f] of files.entries()) { const p = await shrinkForUpload(f); fd.append('photos[]', p, p.name || `foto-${i + 1}.jpg`); }
+      // photos stay under the hosting's request limit (Vercel: 4.5 MB in total)
+      let bytes = 0;
+      for (const [i, f] of files.entries()) { const p = await shrinkForUpload(f); if (bytes + p.size > 3.8 * 1024 * 1024) break; bytes += p.size; fd.append('photos[]', p, p.name || `foto-${i + 1}.jpg`); }
     }
     const r = await fetch(netlify ? location.pathname : BUSINESS.leadEndpoint, { method: 'POST', body: fd, headers: netlify ? {} : { Accept: 'application/json' } });
     return r.ok ? { ok: true } : { error: true };
@@ -1202,11 +1204,11 @@ function paintFin() {
 const wzCfg = mode => mode === 'trade' ? {
   crumb: t('nav.tradeLong'), title: t('wz.trade.title'), leadTitle: t('wz.trade.leadTitle'), lead: t('wz.trade.lead'),
   perks: [t('wz.trade.p1'), t('wz.trade.p2'), t('wz.trade.p3')], submit: t('wz.trade.submit'), ok: t('wz.trade.ok'),
-  other: ['#/blejme', t('wz.trade.other')], img: '1485291571150-772bcfc10da5'
+  other: ['/ankauf', t('wz.trade.other')], img: '1485291571150-772bcfc10da5'
 } : {
   crumb: t('nav.buyLong'), title: t('nav.buyLong'), leadTitle: t('wz.buy.leadTitle'), lead: t('wz.buy.lead'),
   perks: [t('wz.buy.p1'), t('wz.buy.p2'), t('fc.s')], submit: t('wz.buy.submit'), ok: t('wz.buy.ok'),
-  other: ['#/nderrim', t('wz.buy.other')], img: '1568605117036-5fe5e7bab0b7'
+  other: ['/eintausch', t('wz.buy.other')], img: '1568605117036-5fe5e7bab0b7'
 };
 const CONDITIONS = ['vgood', 'good', 'avg', 'repair'];
 const SELL_MAKES = [...new Set(['Alfa Romeo', 'Audi', 'BMW', 'Citroën', 'Cupra', 'Dacia', 'Fiat', 'Ford', 'Honda', 'Hyundai', 'Jaguar', 'Jeep', 'Kia', 'Land Rover', 'Lexus', 'Mazda', 'Mercedes-Benz', 'Mini', 'Nissan', 'Opel', 'Peugeot', 'Porsche', 'Renault', 'Seat', 'Škoda', 'Subaru', 'Suzuki', 'Tesla', 'Toyota', 'Volkswagen', 'Volvo', ...MAKES])].sort((a, b) => a.localeCompare(b));
@@ -1351,7 +1353,7 @@ function renderFavs() {
   $('#favSub').textContent = n ? `${[cars.length ? nVeh(cars.length) : '', rims.length ? nRim(rims.length) : ''].filter(Boolean).join(' · ')} ${t(n === 1 ? 'favs.saved1' : 'favs.savedN')}` : t('favs.empty');
   $('#favClear').hidden = !n;
   const both = cars.length && rims.length;
-  $('#favGrid').innerHTML = n ? (both ? `<h2 class="grid-h">${t('nav.cars')}</h2>` : '') + cars.map(card).join('') + (both ? `<h2 class="grid-h">${t('nav.rims')}</h2>` : '') + rims.map(rimCard).join('') : `<div class="empty"><div class="e-ic" style="color:var(--gold-ink);background:var(--gold-50)">${ico('heart')}</div><h2>${t('favs.noneT')}</h2><p>${t('favs.noneP')}</p><div class="row"><a href="#/search" class="btn btn-dark">${t('nav.cars')}</a><a href="#/rims" class="btn btn-line">${t('nav.rims')}</a></div></div>`;
+  $('#favGrid').innerHTML = n ? (both ? `<h2 class="grid-h">${t('nav.cars')}</h2>` : '') + cars.map(card).join('') + (both ? `<h2 class="grid-h">${t('nav.rims')}</h2>` : '') + rims.map(rimCard).join('') : `<div class="empty"><div class="e-ic" style="color:var(--gold-ink);background:var(--gold-50)">${ico('heart')}</div><h2>${t('favs.noneT')}</h2><p>${t('favs.noneP')}</p><div class="row"><a href="/fahrzeuge" class="btn btn-dark">${t('nav.cars')}</a><a href="/felgen" class="btn btn-line">${t('nav.rims')}</a></div></div>`;
 }
 
 /* ---------- Info (legal) modal ---------- */
@@ -1377,7 +1379,7 @@ function paintBusiness() {
   $('#ftrSocial').innerHTML = soc.map(([ic, n, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener" aria-label="${n}">${ico(ic)}</a>`).join('');
   $('#ftrSocial').hidden = !soc.length;
   $('#ftrReviews').hidden = !REVIEWS.length;
-  $('#drawerFoot').innerHTML = `${hasWa() ? `<a class="btn btn-wa btn-lg" data-wa href="${esc(waLink(tMsg('wa.general')))}" target="_blank" rel="noopener">${icoF('wa')}WhatsApp</a>` : ''}${B.phone ? `<a class="btn btn-white" href="${tel(B.phone)}">${ico('phone')}${t('btn.call')}</a>` : ''}<a class="btn btn-primary" href="#/search">${ico('car')}${t('nav.cars')}</a>`;
+  $('#drawerFoot').innerHTML = `${hasWa() ? `<a class="btn btn-wa btn-lg" data-wa href="${esc(waLink(tMsg('wa.general')))}" target="_blank" rel="noopener">${icoF('wa')}WhatsApp</a>` : ''}${B.phone ? `<a class="btn btn-white" href="${tel(B.phone)}">${ico('phone')}${t('btn.call')}</a>` : ''}<a class="btn btn-primary" href="/fahrzeuge">${ico('car')}${t('nav.cars')}</a>`;
   $$('[data-wa-general]').forEach(a => { a.href = waLink(tMsg('wa.general')); a.hidden = !hasWa(); const box = a.closest('[data-wa-box]'); if (box) box.hidden = !hasWa(); });
 }
 /* ---------- Language switching ---------- */
@@ -1403,7 +1405,7 @@ function setLang(l) {
 }
 
 /* =====================================================================
-   ADMINISTRATION (#/admin) — manage the vehicles of this static site.
+   ADMINISTRATION (/admin) — manage the vehicles of this static site.
    • Every change is previewed instantly in THIS browser (localStorage draft).
    • "Download index.html" writes the vehicles into the site file; uploading that file
      to Netlify publishes the changes for every visitor.
@@ -1439,7 +1441,7 @@ function renderAdmin() {
       <img src="${esc(IMG(v.img, 192, 144))}" alt="" data-fb>
       <div class="adm-main"><b>${esc(v.title)}</b><span>${esc(v.variant)}</span><small>${chf(v.price)} · ${km(v.km)} · ${reg(v)} · ID ${v.id}</small></div>
       <label class="adm-status"><span>${t('insp.label')}</span><select class="select" data-adm-status="${v.id}">${statusOpts(v)}</select></label>
-      <div class="adm-acts"><a class="btn btn-line btn-sm" href="#/car/${v.id}" aria-label="${esc(v.title)}">${ico('eye', 'sm')}</a><button class="btn btn-dark btn-sm" data-adm="edit" data-id="${v.id}">${ico('edit', 'sm')}${t('adm.edit')}</button><button class="btn btn-ghost btn-sm" data-adm="delete" data-id="${v.id}" aria-label="${esc(t('adm.delete'))}">${ico('trash', 'sm')}</button></div>
+      <div class="adm-acts"><a class="btn btn-line btn-sm" href="/fahrzeug/${v.id}" aria-label="${esc(v.title)}">${ico('eye', 'sm')}</a><button class="btn btn-dark btn-sm" data-adm="edit" data-id="${v.id}">${ico('edit', 'sm')}${t('adm.edit')}</button><button class="btn btn-ghost btn-sm" data-adm="delete" data-id="${v.id}" aria-label="${esc(t('adm.delete'))}">${ico('trash', 'sm')}</button></div>
     </div>`).join('')}</div>`;
 }
 let admPhotos = [];
@@ -1526,7 +1528,7 @@ async function downloadSite(kind = 'cars') {
   const rims = kind === 'rims', file = rims ? 'rims.js' : 'vehicles.js', mark = rims ? 'RIMS' : 'VEHICLES';
   const list = rims ? RIMS.map(rimRaw) : VEHICLES.map(rawOf);
   let src;
-  try { const r = await fetch('assets/js/' + file, { cache: 'no-store' }); if (!r.ok) throw 0; src = await r.text(); } catch (e) { toast(t('adm.dlFail'), 'info'); return; }
+  try { const r = await fetch('/assets/js/' + file, { cache: 'no-store' }); if (!r.ok) throw 0; src = await r.text(); } catch (e) { toast(t('adm.dlFail'), 'info'); return; }
   const a = src.indexOf(`/*${mark}-START*/`), b = src.indexOf(`/*${mark}-END*/`);
   if (a < 0 || b < 0) { toast(t('adm.dlFail'), 'info'); return; }
   const out = src.slice(0, a) + `/*${mark}-START*/\nconst ${mark} = [\n  ` + list.map(x => JSON.stringify(x)).join(',\n  ') + '\n];\n' + src.slice(b);
@@ -1564,7 +1566,7 @@ function initAdmin() {
     if (act === 'delete') askConfirm(t('adm.confirmDelete'), ico('trash', 'sm') + t('adm.delete'), () => { const i = VEHICLES.findIndex(x => x.id === id); if (i >= 0) VEHICLES.splice(i, 1); state.favs.delete(id); updateFavCount(); afterVehicleChange(); renderAdmin(); });
     if (act === 'download') downloadSite();
     if (act === 'export') saveFile(JSON.stringify({ vehicles: VEHICLES.map(rawOf) }, null, 2), 'nextcars-fahrzeuge.json', 'application/json');
-    if (act === 'reset') askConfirm(t('adm.reset') + '?', t('adm.reset'), () => { try { localStorage.removeItem(DRAFT_KEY); sessionStorage.setItem(ADMIN_RESUME_KEY, '1'); } catch (err) { /* ignore */ } history.replaceState(null, '', '#/admin'); location.reload(); });
+    if (act === 'reset') askConfirm(t('adm.reset') + '?', t('adm.reset'), () => { try { localStorage.removeItem(DRAFT_KEY); sessionStorage.setItem(ADMIN_RESUME_KEY, '1'); } catch (err) { /* ignore */ } history.replaceState(null, '', '/admin'); location.reload(); });
   });
   /* photo buttons inside the editor modal */
   $('#modal').addEventListener('click', e => {
@@ -1610,7 +1612,7 @@ function askAdminPassword() {
     btn.disabled = false;
     if (!ok) { adminFails++; adminLockUntil = Date.now() + Math.min(2 ** (adminFails - 1), 30) * 1000; fail('adm.pwWrong'); return; }
     adminFails = 0;
-    closeModal(); adminPass = true; go('#/admin');
+    closeModal(); adminPass = true; go('/admin');
   });
 }
 /* One-shot pass so "Discard preview" can reload straight back into the admin page */
@@ -1630,7 +1632,19 @@ function logoTripleClick() {
 
 /* ---------- Router ---------- */
 let currentView = '', prevRoute = '';
-function go(h) { if (location.hash === h) route(); else location.hash = h; }
+/* Clean addresses: /fahrzeuge, /fahrzeug/8, /felgen … (the hosting serves index.html for them, see vercel.json / .htaccess) */
+const VIEW_PATHS = { home: '/', search: '/fahrzeuge', car: '/fahrzeug', rims: '/felgen', rim: '/felge', nderrim: '/eintausch', blejme: '/ankauf', financim: '/finanzierung', kontakt: '/kontakt', favourites: '/favoriten', admin: '/admin' };
+const PATH_VIEWS = Object.fromEntries(Object.entries(VIEW_PATHS).map(([v, p]) => [p, v]));
+const here = () => location.pathname + location.search;
+function go(url) { if (here() !== url) history.pushState(null, '', url); route(); }
+/* old links with #/… (e.g. shared on WhatsApp before) → the same page at its clean address */
+function legacyHashToPath(hash) {
+  const [path, query] = hash.replace(/^#/, '').split('?');
+  const parts = path.split('/').filter(Boolean);
+  const view = ALIASES[parts[0]] || parts[0];
+  const base = VIEW_PATHS[view] || '/';
+  return (base === '/' ? '/' : base + (parts[1] ? '/' + encodeURIComponent(parts[1]) : '')) + (query ? '?' + query : '');
+}
 function parseQuery(q) {
   const f = DEF(), p = new URLSearchParams(q);
   ['make', 'fuel', 'trans', 'body', 'drive', 'color'].forEach(k => { if (p.get(k)) f[k] = p.get(k).split(','); });
@@ -1640,16 +1654,14 @@ function parseQuery(q) {
 }
 const ALIASES = { makinat: 'search', sell: 'blejme', dealers: 'kontakt', dealer: 'kontakt' };
 function route(keepScroll = false) {
-  const h = location.hash.replace(/^#/, '') || '/';
-  const [path, query] = h.split('?');
-  const parts = path.split('/').filter(Boolean);
-  let view = parts[0] || 'home';
-  if (ALIASES[view]) view = ALIASES[view];
+  const h = here(), query = location.search.slice(1);
+  const parts = location.pathname.split('/').filter(Boolean).map(decodeURIComponent);
+  let view = PATH_VIEWS['/' + (parts[0] || '')] || (parts.length ? 'unknown' : 'home');
   if (!['home', 'search', 'car', 'rims', 'rim', 'nderrim', 'blejme', 'financim', 'kontakt', 'favourites', 'admin'].includes(view)) view = 'home';
-  // #/admin only opens right after the password (or on a re-render / "Discard preview" reload) — never from the address bar
+  // /admin only opens right after the password (or on a re-render / "Discard preview" reload) — never from the address bar
   const blocked = view === 'admin' && !(adminPass || (keepScroll && currentView === 'admin') || takeAdminResume());
   if (view === 'admin') adminPass = false;
-  if (blocked) { history.replaceState(null, '', '#/'); view = 'home'; }
+  if (blocked) { history.replaceState(null, '', '/'); view = 'home'; }
   const panel = ['nderrim', 'blejme'].includes(view) ? 'sell' : view === 'rim' ? 'car' : view;
   $$('.view').forEach(v => v.classList.toggle('on', v.dataset.view === panel));
   $$('.nav a').forEach(a => a.classList.toggle('active', a.dataset.nav === view || (view === 'car' && a.dataset.nav === 'search') || (view === 'rim' && a.dataset.nav === 'rims')));
@@ -1712,10 +1724,10 @@ document.addEventListener('click', e => {
   const rfav = el.closest('[data-rfav]'); if (rfav) { e.preventDefault(); e.stopPropagation(); toggleFav(rfav.dataset.rfav, 'rim'); return; }
   const lead = el.closest('[data-lead]'); if (lead) { e.preventDefault(); openLead(lead.dataset.lead, lead.dataset.car || lead.dataset.rim || '', lead.dataset.extw ? { extWarranty: '1' } : {}); return; }
   if (el.closest('[data-fin-again]')) { paintFin(); return; }
-  const cardEl = el.closest('.card[data-car]'); if (cardEl) { go('#/car/' + cardEl.dataset.car); return; }
-  const rimEl = el.closest('.card[data-rim]'); if (rimEl) { go('#/rim/' + rimEl.dataset.rim); return; }
-  const br = el.closest('[data-brand]'); if (br) { e.preventDefault(); F = DEF(); F.make = [br.dataset.brand]; go('#/search'); return; }
-  const bt = el.closest('[data-bodyt]'); if (bt) { F = DEF(); F.body = [bt.dataset.bodyt]; go('#/search'); return; }
+  const cardEl = el.closest('.card[data-car]'); if (cardEl) { e.preventDefault(); go('/fahrzeug/' + cardEl.dataset.car); return; }
+  const rimEl = el.closest('.card[data-rim]'); if (rimEl) { e.preventDefault(); go('/felge/' + rimEl.dataset.rim); return; }
+  const br = el.closest('[data-brand]'); if (br) { e.preventDefault(); F = DEF(); F.make = [br.dataset.brand]; go('/fahrzeuge'); return; }
+  const bt = el.closest('[data-bodyt]'); if (bt) { F = DEF(); F.body = [bt.dataset.bodyt]; go('/fahrzeuge'); return; }
   const inf = el.closest('[data-info]'); if (inf) { e.preventDefault(); openInfo(inf.dataset.info); return; }
   if (el.closest('[data-close]')) { closeModal(); return; }
   if (el.closest('[data-rclear]')) { RF = RDEF(); $('#rQ').value = ''; refreshRims(); toast(t('toast.cleared'), 'x'); return; }
@@ -1729,8 +1741,12 @@ document.addEventListener('click', e => {
   if (el.closest('[data-skip]')) { e.preventDefault(); $('#app').focus(); return; }
   if (el.closest('a.logo') && logoTripleClick()) { e.preventDefault(); setTimeout(askAdminPassword, 0); return; }
   if (el.closest('#admBar a')) { e.preventDefault(); askAdminPassword(); return; }
-  // Same-hash links (e.g. "#/?s=dergesa" while already there) should still navigate/scroll
-  const a = el.closest('a[href^="#/"]'); if (a && a.getAttribute('href') === location.hash) { e.preventDefault(); route(); }
+  // Internal links: switch page without reloading (new tab / modifier clicks keep the browser's behaviour)
+  const a = el.closest('a[href^="/"]');
+  if (a && !a.target && !a.hasAttribute('download') && !e.defaultPrevented && e.button === 0 && !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)) {
+    const href = a.getAttribute('href');
+    if (!href.startsWith('//') && !/^\/(assets|api)\//.test(href)) { e.preventDefault(); go(href); }
+  }
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Tab') trapTab(e);
@@ -1747,9 +1763,10 @@ $('#lbNext').addEventListener('click', () => setG(G.i + 1));
 $('#lightbox').addEventListener('click', e => { if (e.target.classList.contains('lb-img')) closeLB(); });
 $('#favClear').addEventListener('click', () => { state.favs.clear(); state.rimFavs.clear(); updateFavCount(); renderFavs(); toast(t('favs.cleared'), 'x'); });
 addEventListener('scroll', () => $('#hdr').classList.toggle('scrolled', scrollY > 8), { passive: true });
-addEventListener('hashchange', () => route());
+addEventListener('popstate', () => route());
 
 /* ---------- Boot ---------- */
 $$('img[data-logo]').forEach(i => i.src = LOGO_SRC);
+if (/^#\//.test(location.hash)) history.replaceState(null, '', legacyHashToPath(location.hash));
 applyStatic(); paintBusiness(); initHero(); renderHome(); initSearch(); initRims(); initAdmin(); updateFavCount(); route();
 })();

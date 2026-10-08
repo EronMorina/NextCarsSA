@@ -38,7 +38,7 @@ function prepRim(r) {
   r.id = +r.id; r.price = +r.price || 0; r.size = +r.size || 0; r.width = +r.width || 0; r.et = +r.et || 0; r.qty = +r.qty || 1;
   r.cb = r.cb ? +r.cb : '';
   r.currency = r.currency === 'EUR' ? 'EUR' : 'CHF';
-  r.pcd = String(r.pcd || '').toLowerCase().replace(/s+/g, '');
+  r.pcd = String(r.pcd || '').toLowerCase().replace(/\s+/g, '');
   if (!RIM_MATERIALS.includes(r.material)) r.material = 'alloy';
   if (!RIM_CONDITIONS.includes(r.condition)) r.condition = 'used';
   if (!RIM_STATUSES.includes(r.status)) r.status = 'active';
@@ -46,10 +46,10 @@ function prepRim(r) {
   r.photos = Array.isArray(r.photos) ? r.photos.filter(Boolean) : [];
   r.img = r.photos[0] || '';
   r.gallery = r.photos.length ? r.photos.map(id => ({ id })) : [{ id: '' }];   // '' → placeholder image
-  r.listed = /^d{4}-d{2}-d{2}$/.test(r.listed || '') ? r.listed : '2000-01-01';
+  r.listed = /^\d{4}-\d{2}-\d{2}$/.test(r.listed || '') ? r.listed : '2000-01-01';
   return r;
 }
-/* Admin preview: vehicles edited in #/admin are shown in THIS browser only, until published */
+/* Admin preview: vehicles edited in the admin page are shown in THIS browser only, until published */
 let ADMIN_DRAFT = false;
 try {
   const draft = JSON.parse(localStorage.getItem('nextcars-admin-draft') || 'null');
