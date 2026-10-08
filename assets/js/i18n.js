@@ -491,6 +491,7 @@ const I18N = {
   'rim.id': ['Angebots-Nr.', 'N° d’annonce', 'N. annuncio', 'Listing no.'],
   'rims.found1': ['gefunden', 'trouvée', 'trovato', 'found'],
   'rims.foundN': ['gefunden', 'trouvées', 'trovati', 'found'],
+  'ftr.madeBy': ['Website von', 'Site web par', 'Sito web di', 'Website by'],
   'nav.rims': ['Felgen', 'Jantes', 'Cerchi', 'Rims'],
   'nav.cat': ['Kategorie', 'Catégorie', 'Categoria', 'Category'],
   'rim.one': ['Angebot', 'annonce', 'annuncio', 'listing'],

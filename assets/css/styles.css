@@ -337,6 +337,8 @@ p{margin:0}
 .ftr-langs button{height:32px;padding:0 11px;border-radius:8px;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.8);font-size:13px}
 .ftr-langs button.on,.ftr-langs button:hover{background:#fff;color:var(--ink);border-color:#fff}
 .ftr-bottom{margin-top:48px;padding-top:22px;border-top:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;gap:16px;font-size:13px;flex-wrap:wrap}
+.ftr-credit{color:#fff;font-weight:700;letter-spacing:.06em;text-decoration:none;transition:color .15s}
+.ftr-credit:hover{color:var(--gold)}
 .ftr-bottom .note{color:rgba(255,255,255,.45);max-width:70ch}
 .social{display:flex;gap:8px}
 .social a{width:36px;height:36px;border-radius:9px;border:1px solid rgba(255,255,255,.16);display:grid;place-items:center}
