@@ -5,10 +5,11 @@
 'use strict';
 
 /* ---------- Language ---------- */
-/* the visitor's own choice, else the first browser language the site auto-selects, else the fallback */
-const browserLang = () => (navigator.languages || [navigator.language]).map(l => String(l || '').slice(0, 2).toLowerCase()).find(l => AUTO_LANGS.includes(l)) || VISITOR_FALLBACK_LANG;
+/* the visitor's own choice, else their browser's main language if auto-selected, else the fallback */
+const LANG_KEY = 'nextcars-lang-v2';   // renamed once so choices saved before French became the default are forgotten
+const browserLang = () => { const l = String((navigator.languages || [])[0] || navigator.language || '').slice(0, 2).toLowerCase(); return AUTO_LANGS.includes(l) ? l : VISITOR_FALLBACK_LANG; };
 let lang = browserLang();
-try { const saved = localStorage.getItem('nextcars-lang'); if (LANGS.includes(saved)) lang = saved; } catch (e) { /* storage unavailable */ }
+try { const saved = localStorage.getItem(LANG_KEY); if (LANGS.includes(saved)) lang = saved; } catch (e) { /* storage unavailable */ }
 const li = () => LANGS.indexOf(lang);
 const t = (k, vars) => {
   const e = I18N[k]; let s = e ? (e[li()] ?? e[0]) : k;
@@ -1401,7 +1402,7 @@ function setLang(l) {
   $('#langMenu').classList.remove('open'); $('#langBtn').setAttribute('aria-expanded', 'false');
   if (l === lang) return;
   lang = l;
-  try { localStorage.setItem('nextcars-lang', l); } catch (e) { /* storage unavailable */ }
+  try { localStorage.setItem(LANG_KEY, l); } catch (e) { /* storage unavailable */ }
   buildLabels(); applyStatic(); fillHeroOptions(); renderHome(); paintBusiness(); updateFavCount();
   route(true);
 }

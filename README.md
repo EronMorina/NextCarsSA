@@ -40,8 +40,8 @@ Opening `index.html` directly from the disk does not work any more — use a loc
 
 ## Languages
 
-DE / FR / IT / EN. On the first visit the site opens in the visitor's browser language if it is German, French or
-Italian (Zurich → DE, Geneva / Lausanne → FR, Ticino → IT), otherwise in French. A language the visitor picks is
+DE / FR / IT / EN. On the first visit the site opens in the visitor's main browser language if it is German or
+Italian (Zurich → DE, Geneva / Lausanne → FR, Ticino → IT), otherwise in French (also the language of the page title and link previews). A language the visitor picks is
 remembered. Settings: `AUTO_LANGS` and `VISITOR_FALLBACK_LANG` in `assets/js/i18n.js`.
 Request e-mails to NEXT CARS SA are always in German.
 

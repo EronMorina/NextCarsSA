@@ -6,7 +6,7 @@
 const LANGS = ['de', 'fr', 'it', 'en'];
 const LANG_NAMES = { de: 'Deutsch', fr: 'Français', it: 'Italiano', en: 'English' };
 const DEFAULT_LANG = 'de';      // fallback for texts (vehicle descriptions etc.) missing in a language
-/* First visit: the site opens in the visitor's browser language if it is one of these
+/* First visit: the site opens in the visitor's main browser language if it is one of these
    (Zurich → de, Geneva / Lausanne → fr, Ticino → it), otherwise in VISITOR_FALLBACK_LANG.
    A language the visitor picks is remembered. */
 const AUTO_LANGS = ['de', 'fr', 'it'];
