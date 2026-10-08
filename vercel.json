@@ -1,4 +1,5 @@
 {
+  "regions": ["fra1"],
   "rewrites": [
     {
       "source": "/:page(fahrzeuge|fahrzeug|felgen|felge|eintausch|ankauf|finanzierung|kontakt|favoriten|admin)",

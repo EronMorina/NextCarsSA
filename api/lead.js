@@ -69,21 +69,22 @@ function buildMail({ from, fromName, to, replyName, replyTo, subject, text, atta
 /* minimal SMTP client: SSL connection, AUTH PLAIN, one recipient */
 function smtpSend({ host, port, user, pass, to, data }) {
   return new Promise((resolve, reject) => {
+    // [expected reply, what to send next, name of the step whose reply this is]
     const steps = [
-      [220, () => 'EHLO nextcars-sa.ch'],
-      [250, () => 'AUTH PLAIN ' + Buffer.from(`\0${user}\0${pass}`).toString('base64')],
-      [235, () => `MAIL FROM:<${user}>`],
-      [250, () => `RCPT TO:<${to}>`],
-      [250, () => 'DATA'],
-      [354, () => data.replace(/\r\n\./g, '\r\n..') + '.'],   // message ends with "<CRLF>.<CRLF>"
-      [250, () => 'QUIT']
+      [220, () => 'EHLO nextcars-sa.ch', 'connect'],
+      [250, () => 'AUTH PLAIN ' + Buffer.from(`\0${user}\0${pass}`).toString('base64'), 'ehlo'],
+      [235, () => `MAIL FROM:<${user}>`, 'login'],
+      [250, () => `RCPT TO:<${to}>`, 'sender'],
+      [250, () => 'DATA', 'recipient'],
+      [354, () => data.replace(/\r\n\./g, '\r\n..') + '.', 'data'],   // message ends with "<CRLF>.<CRLF>"
+      [250, () => 'QUIT', 'message']
     ];
     let buf = '', step = 0, finished = false;
     const sock = tls.connect({ host, port, servername: host });
     const end = err => { if (finished) return; finished = true; clearTimeout(timer); sock.destroy(); err ? reject(err) : resolve(); };
-    const timer = setTimeout(() => end(new Error('SMTP timeout')), 20000);
+    const timer = setTimeout(() => end(Object.assign(new Error('SMTP timeout'), { step: 'timeout' })), 20000);
     sock.setEncoding('utf8');
-    sock.on('error', err => end(err));
+    sock.on('error', err => end(Object.assign(err, { step: 'network-' + (err.code || 'error') })));
     sock.on('close', () => end(step >= steps.length ? null : new Error('SMTP connection closed early')));
     sock.on('data', chunk => {
       buf += chunk;
@@ -93,7 +94,7 @@ function smtpSend({ host, port, user, pass, to, data }) {
       buf = '';
       const code = +last.slice(0, 3);
       if (step >= steps.length) return end(null);            // reply to QUIT
-      if (code !== steps[step][0]) return end(new Error(`SMTP ${code} ${last.slice(4, 160)}`));
+      if (code !== steps[step][0]) return end(Object.assign(new Error(`SMTP ${code} ${last.slice(4, 160)}`), { step: `${steps[step][2]}-${code}` }));
       sock.write(steps[step++][1]() + '\r\n');
     });
   });
@@ -165,7 +166,7 @@ module.exports = async (req, res) => {
     await smtpSend({ host: process.env.SMTP_HOST || 'mail.infomaniak.com', port: +process.env.SMTP_PORT || 465, user: smtpUser, pass: smtpPass, to: recipient, data });
   } catch (e) {
     console.error('lead: sending failed –', e.message);   // no personal data in the log
-    return send(res, 502, { error: 'send' });
+    return send(res, 502, { error: 'send', step: String(e.step || 'unknown') });   // e.g. "login-535" = wrong mailbox password
   }
   return send(res, 200, { ok: true });
 };
