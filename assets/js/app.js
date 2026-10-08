@@ -5,7 +5,9 @@
 'use strict';
 
 /* ---------- Language ---------- */
-let lang = DEFAULT_LANG;
+/* the visitor's own choice, else the first browser language the site auto-selects, else the fallback */
+const browserLang = () => (navigator.languages || [navigator.language]).map(l => String(l || '').slice(0, 2).toLowerCase()).find(l => AUTO_LANGS.includes(l)) || VISITOR_FALLBACK_LANG;
+let lang = browserLang();
 try { const saved = localStorage.getItem('nextcars-lang'); if (LANGS.includes(saved)) lang = saved; } catch (e) { /* storage unavailable */ }
 const li = () => LANGS.indexOf(lang);
 const t = (k, vars) => {

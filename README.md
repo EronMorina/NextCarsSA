@@ -38,6 +38,13 @@ Clean addresses, no `#`: `/`, `/fahrzeuge`, `/fahrzeug/<id>`, `/felgen`, `/felge
 Old links with `#/…` (e.g. shared before) are redirected to the clean address automatically.
 Opening `index.html` directly from the disk does not work any more — use a local web server.
 
+## Languages
+
+DE / FR / IT / EN. On the first visit the site opens in the visitor's browser language if it is German, French or
+Italian (Zurich → DE, Geneva / Lausanne → FR, Ticino → IT), otherwise in French. A language the visitor picks is
+remembered. Settings: `AUTO_LANGS` and `VISITOR_FALLBACK_LANG` in `assets/js/i18n.js`.
+Request e-mails to NEXT CARS SA are always in German.
+
 ## Admin page
 
 Click the logo **3 times quickly** and enter the admin password. The password is asked every time the admin page is opened.
